@@ -7,8 +7,8 @@ android {
         applicationId "guepardoapps.mycoins"
         minSdkVersion 21
         targetSdkVersion 26
-        versionCode 100
-        versionName "0.1.0.171015"
+        versionCode 101
+        versionName "0.1.1.171020"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {

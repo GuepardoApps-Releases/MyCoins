@@ -2,6 +2,7 @@ package guepardoapps.mycoins.common.converter;
 
 import android.support.annotation.NonNull;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -16,12 +17,22 @@ public class JsonDataToCoinAggregateConverter {
         }
 
         JSONObject jsonObject = new JSONObject(responseString);
-        boolean aggregated = jsonObject.getBoolean("Aggregated");
+
+        JSONArray dataArray = jsonObject.getJSONArray("Data");
+        int arraySize = dataArray.length();
+
+        JSONObject firstEntry = dataArray.getJSONObject(0);
+        double openValue = firstEntry.getDouble("open");
+
+        JSONObject lastEntry = dataArray.getJSONObject(arraySize - 1);
+        double closeValue = lastEntry.getDouble("close");
+
+        double difference = closeValue - openValue;
 
         if (currency.contains("EUR")) {
-            coinDto.SetEuroAggregation(aggregated ? CoinDto.Aggregation.Rise : CoinDto.Aggregation.Fall);
+            coinDto.SetEuroAggregation(difference > 0 ? CoinDto.Aggregation.Rise : CoinDto.Aggregation.Fall);
         } else if (currency.contains("USD")) {
-            coinDto.SetUsDollarAggregation(aggregated ? CoinDto.Aggregation.Rise : CoinDto.Aggregation.Fall);
+            coinDto.SetUsDollarAggregation(difference > 0 ? CoinDto.Aggregation.Rise : CoinDto.Aggregation.Fall);
         }
 
         return coinDto;
