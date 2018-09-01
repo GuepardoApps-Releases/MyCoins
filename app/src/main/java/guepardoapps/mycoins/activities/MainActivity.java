@@ -12,13 +12,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ListView;
 
-import guepardoapps.mycoins.CoinService;
+import guepardoapps.mycoins.services.CoinService;
 import guepardoapps.mycoins.R;
-import guepardoapps.mycoins.basic.dto.CoinDto;
-import guepardoapps.mycoins.basic.utils.Logger;
-import guepardoapps.mycoins.common.controller.NavigationController;
-import guepardoapps.mycoins.common.controller.ReceiverController;
-import guepardoapps.mycoins.common.controller.SettingsController;
+import guepardoapps.mycoins.models.CoinDto;
+import guepardoapps.mycoins.controller.NavigationController;
+import guepardoapps.mycoins.controller.ReceiverController;
+import guepardoapps.mycoins.controller.SettingsController;
 import guepardoapps.mycoins.customadapter.CoinListAdapter;
 
 public class MainActivity extends AppCompatActivity {

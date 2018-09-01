@@ -17,11 +17,10 @@ import java.util.Locale;
 
 import de.mateware.snacky.Snacky;
 
-import guepardoapps.mycoins.CoinService;
+import guepardoapps.mycoins.services.CoinService;
 import guepardoapps.mycoins.R;
-import guepardoapps.mycoins.basic.dto.CoinDto;
-import guepardoapps.mycoins.basic.utils.Logger;
-import guepardoapps.mycoins.common.controller.ReceiverController;
+import guepardoapps.mycoins.models.CoinDto;
+import guepardoapps.mycoins.controller.ReceiverController;
 
 public class ActivityCoinEdit extends AppCompatActivity {
     private static final String TAG = ActivityCoinEdit.class.getSimpleName();

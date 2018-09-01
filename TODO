@@ -1,5 +1,6 @@
-[] switch to Kotlin
-[] update libs and dependencies
-[] use modern stuff like Rx
-[] add notifications if an upper or lower limit of a coin value was reached, if set by user (maybe use floating notification)
-[] improve layout
+[ ] switch to Kotlin
+[X] update libs and dependencies
+[ ] use modern stuff like Rx
+[ ] add notifications if an upper or lower limit of a coin value was reached, if set by user (maybe use floating notification)
+[ ] improve layout
+[ ] ...

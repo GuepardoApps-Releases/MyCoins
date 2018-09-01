@@ -5,9 +5,8 @@ import android.os.Bundle;
 import android.os.Handler;
 
 import guepardoapps.mycoins.R;
-import guepardoapps.mycoins.basic.utils.Logger;
-import guepardoapps.mycoins.common.controller.NavigationController;
-import guepardoapps.mycoins.common.controller.SettingsController;
+import guepardoapps.mycoins.controller.NavigationController;
+import guepardoapps.mycoins.controller.SettingsController;
 
 public class ActivityBoot extends Activity {
     private static final String TAG = ActivityBoot.class.getSimpleName();

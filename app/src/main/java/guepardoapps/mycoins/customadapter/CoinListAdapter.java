@@ -19,13 +19,12 @@ import com.rey.material.app.Dialog;
 import com.rey.material.app.ThemeManager;
 import com.rey.material.widget.FloatingActionButton;
 
-import guepardoapps.mycoins.CoinService;
+import guepardoapps.mycoins.services.CoinService;
 import guepardoapps.mycoins.R;
 import guepardoapps.mycoins.activities.ActivityCoinEdit;
-import guepardoapps.mycoins.basic.dto.CoinDto;
-import guepardoapps.mycoins.basic.enums.Currency;
-import guepardoapps.mycoins.basic.utils.Logger;
-import guepardoapps.mycoins.common.controller.NavigationController;
+import guepardoapps.mycoins.models.CoinDto;
+import guepardoapps.mycoins.enums.Currency;
+import guepardoapps.mycoins.controller.NavigationController;
 
 public class CoinListAdapter extends BaseAdapter {
     private static final String TAG = CoinListAdapter.class.getSimpleName();

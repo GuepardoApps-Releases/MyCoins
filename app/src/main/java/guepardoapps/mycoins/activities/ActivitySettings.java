@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.view.KeyEvent;
 
 import guepardoapps.mycoins.R;
-import guepardoapps.mycoins.basic.utils.Logger;
 
 public class ActivitySettings extends Activity {
     private static final String TAG = ActivitySettings.class.getSimpleName();
