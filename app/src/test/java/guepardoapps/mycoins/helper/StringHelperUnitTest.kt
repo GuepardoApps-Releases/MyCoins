@@ -12,7 +12,7 @@ import org.junit.runner.RunWith
 @RunWith(JUnitPlatform::class)
 class StringHelperUnitTest : Spek({
 
-    describe("Unit tests for StringHelperUnitTest") {
+    describe("Unit tests for StringHelper") {
 
         beforeEachTest { }
 

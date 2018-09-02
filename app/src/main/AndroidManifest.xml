@@ -19,6 +19,9 @@
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
         <activity
+            android:name=".activities.ActivityAbout"
+            android:theme="@style/AppTheme.MaterialAboutActivity" />
+        <activity
             android:name=".activities.ActivityBoot"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar">
@@ -29,19 +32,11 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activities.ActivityCoinEdit"
+            android:name=".activities.ActivityEdit"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".activities.MainActivity"
-            android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name=".activities.ActivityImpressum"
-            android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name=".activities.ActivitySettings"
+            android:name=".activities.ActivityMain"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar" />
     </application>

@@ -11,7 +11,7 @@ import org.junit.runner.RunWith
 @RunWith(JUnitPlatform::class)
 class NumberExtensionUnitTest : Spek({
 
-    describe("Unit tests for NumberExtensionUnitTest") {
+    describe("Unit tests for NumberExtension") {
 
         beforeEachTest { }
 

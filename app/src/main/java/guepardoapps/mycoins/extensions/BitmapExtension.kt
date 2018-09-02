@@ -6,7 +6,7 @@ import android.graphics.*
  * @param color the color set for the bitmap
  * @return returns a rounded bitmap
  */
-fun Bitmap.circleBitmap(color: Int): Bitmap {
+internal fun Bitmap.circleBitmap(color: Int): Bitmap {
     return this.circleBitmap(this.height, this.width, color)
 }
 
@@ -16,7 +16,7 @@ fun Bitmap.circleBitmap(color: Int): Bitmap {
  * @param color the color set for the bitmap
  * @return returns a rounded bitmap
  */
-fun Bitmap.circleBitmap(height: Int,
+internal fun Bitmap.circleBitmap(height: Int,
                         width: Int,
                         color: Int): Bitmap {
     val output: Bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)

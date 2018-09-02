@@ -1,6 +1,7 @@
 package guepardoapps.mycoins
 
 import android.app.Application
+import guepardoapps.mycoins.services.coin.CoinService
 import guepardoapps.mycoins.utils.Logger
 
 class MyCoinsApp : Application() {
@@ -8,7 +9,10 @@ class MyCoinsApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
+
         Logger.instance.initialize(this)
         Logger.instance.debug(tag, "onCreate")
+
+        CoinService.instance.initialize(this)
     }
 }

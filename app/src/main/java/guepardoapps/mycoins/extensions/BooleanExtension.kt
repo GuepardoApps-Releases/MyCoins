@@ -1,6 +1,6 @@
 package guepardoapps.mycoins.extensions
 
-fun Boolean.toInteger(): Int {
+internal fun Boolean.toInteger(): Int {
     if (this) {
         return 1
     }

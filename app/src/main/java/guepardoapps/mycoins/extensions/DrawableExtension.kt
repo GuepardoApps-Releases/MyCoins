@@ -18,7 +18,7 @@ import android.graphics.drawable.shapes.Shape
  * @param padding   padding used in the new shape
  * @return returns a shape
  */
-fun ShapeDrawable.drawShape(
+internal fun ShapeDrawable.drawShape(
         shape: Shape,
         width: Int,
         height: Int,
@@ -42,7 +42,7 @@ fun ShapeDrawable.drawShape(
  * @param padding padding used in the new shape
  * @return returns a shape as a circle
  */
-fun ShapeDrawable.drawCircle(
+internal fun ShapeDrawable.drawCircle(
         width: Int,
         height: Int,
         color: Int,
@@ -60,7 +60,7 @@ fun ShapeDrawable.drawCircle(
  * @param padding padding used in the new shape
  * @return returns a shape as a rectangle
  */
-fun ShapeDrawable.drawRectangle(
+internal fun ShapeDrawable.drawRectangle(
         width: Int,
         height: Int,
         color: Int,
@@ -79,7 +79,7 @@ fun ShapeDrawable.drawRectangle(
  * @param outerRadii the radii to the corners
  * @return returns a shape as a rectangle with rounded corners
  */
-fun ShapeDrawable.drawRoundCornerRectangle(
+internal fun ShapeDrawable.drawRoundCornerRectangle(
         width: Int,
         height: Int,
         color: Int,
@@ -99,7 +99,7 @@ fun ShapeDrawable.drawRoundCornerRectangle(
  * @param cornerRadius radius at the corners
  * @return returns a gradient shape
  */
-fun ShapeDrawable.drawGradientDrawable(
+internal fun ShapeDrawable.drawGradientDrawable(
         orientation: GradientDrawable.Orientation,
         startColor: Int,
         endColor: Int,
