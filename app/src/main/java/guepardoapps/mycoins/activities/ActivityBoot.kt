@@ -55,7 +55,6 @@ class ActivityBoot : Activity() {
         }
 
         CoinService.instance.loadCoinConversion()
-        CoinService.instance.loadCoinTrend()
 
         Handler().postDelayed({ NavigationController(this).navigate(ActivityMain::class.java, true) }, delayInMillis)
     }

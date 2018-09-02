@@ -16,10 +16,10 @@ import com.evernote.android.state.State
 import com.evernote.android.state.StateSaver
 import guepardoapps.mycoins.R
 import guepardoapps.mycoins.common.Constants
-import guepardoapps.mycoins.database.coin.DbCoin
 import guepardoapps.mycoins.enums.CoinType
 import guepardoapps.mycoins.extensions.byString
 import guepardoapps.mycoins.models.Coin
+import guepardoapps.mycoins.services.coin.CoinService
 import kotlinx.android.synthetic.main.side_edit.*
 
 @SuppressLint("SetTextI18n")
@@ -58,7 +58,7 @@ class ActivityEdit : Activity() {
         val data = intent.extras
         if (data != null) {
             val id = data.getInt(Constants.bundleDataId)
-            coin = DbCoin(this).findById(id).firstOrNull()
+            coin = CoinService.instance.getCoinById(id)
             if (coin != null) {
                 coin_type_edit_textview.setText(coin?.coinType?.type)
                 coin_amount_edit_textview.setText(coin?.amount?.toString())
@@ -92,9 +92,9 @@ class ActivityEdit : Activity() {
                 val amount = amountString.toDouble()
 
                 if (coin != null) {
-                    DbCoin(this).update(Coin(coin?.id!!, coinType, amount))
+                    CoinService.instance.updateCoin(Coin(coin?.id!!, coinType, amount))
                 } else {
-                    DbCoin(this).add(Coin(0, coinType, amount))
+                    CoinService.instance.addCoin(Coin(0, coinType, amount))
                 }
 
                 finish()

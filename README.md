@@ -6,7 +6,7 @@
 <a target="_blank" href="https://www.paypal.me/GuepardoApps" title="Donate using PayPal"><img src="https://img.shields.io/badge/paypal-donate-blue.svg" /></a>
 
 [![Build](https://img.shields.io/badge/build-WIP-orange.svg)](https://github.com/GuepardoApps/MyCoins/tree/develop/releases)
-[![Version](https://img.shields.io/badge/version-v1.1.0.180901-blue.svg)](https://github.com/GuepardoApps/MyCoins/tree/develop/releases/v1.1.0.180901.apk)
+[![Version](https://img.shields.io/badge/version-v1.1.0.180902-blue.svg)](https://github.com/GuepardoApps/MyCoins/tree/develop/releases/v1.1.0.180902.apk)
 
 Simple android application with material design to save the amount of coins you have and to check the value for each coins. Furthermore you get the trend of the last 24h.
 

@@ -34,6 +34,7 @@ internal class CoinListAdapter(private val context: Context, private val list: M
 
         lateinit var currencyImage: ImageView
         lateinit var currencyValue: TextView
+        lateinit var totalValue: TextView
 
         lateinit var edit: FloatingActionButton
         lateinit var delete: FloatingActionButton
@@ -63,6 +64,7 @@ internal class CoinListAdapter(private val context: Context, private val list: M
         holder.amount = rowView.findViewById(R.id.coin_item_amount)
         holder.currencyImage = rowView.findViewById(R.id.coin_item_currency_image)
         holder.currencyValue = rowView.findViewById(R.id.coin_item_currency_value)
+        holder.totalValue = rowView.findViewById(R.id.coin_item_total_value)
 
         holder.edit = rowView.findViewById(R.id.btnEdit)
         holder.delete = rowView.findViewById(R.id.btnDelete)
@@ -82,11 +84,14 @@ internal class CoinListAdapter(private val context: Context, private val list: M
         if (coinConversion != null) {
             if (currency == Currency.EUR) {
                 holder.currencyValue.text = coinConversion.eurValue.doubleFormat(2) + " €"
+                holder.totalValue.text = (coinConversion.eurValue * coin.amount).doubleFormat(2) + " €"
             } else {
                 holder.currencyValue.text = coinConversion.usDollarValue.doubleFormat(2) + " $"
+                holder.totalValue.text = (coinConversion.usDollarValue * coin.amount).doubleFormat(2) + " $"
             }
         } else {
             holder.currencyValue.text = "-"
+            holder.totalValue.text = ""
         }
 
         holder.edit.setOnClickListener {

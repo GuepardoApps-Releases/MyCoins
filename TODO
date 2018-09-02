@@ -2,7 +2,7 @@
 [X] update libs and dependencies
 [X] use modern stuff like Rx
 [ ] add notifications if an upper or lower limit of a coin value was reached, if set by user (maybe use floating notification)
-[ ] improve layout
+[X] improve layout
 [ ] improve performance -> move download and conversion to asynctask
 [ ] add reload
 [ ] add settings

@@ -10,7 +10,7 @@ import java.sql.Date
 import java.util.*
 
 internal class Logger private constructor() {
-    private var loggingEnabled: Boolean = true
+    var loggingEnabled: Boolean = true
     private var writeToDatabaseEnabled: Boolean = true
     private var dbHandler: DbLogging? = null
 
@@ -30,35 +30,35 @@ internal class Logger private constructor() {
     }
 
     fun <T> verbose(@NonNull tag: String, @NonNull description: T) {
-        if (dbHandler != null && loggingEnabled) {
+        if (loggingEnabled) {
             Log.v(tag, description.toString())
             tryToWriteToDatabase(tag, description, Severity.Verbose)
         }
     }
 
     fun <T> debug(@NonNull tag: String, @NonNull description: T) {
-        if (dbHandler != null && loggingEnabled) {
+        if (loggingEnabled) {
             Log.d(tag, description.toString())
             tryToWriteToDatabase(tag, description, Severity.Debug)
         }
     }
 
     fun <T> info(@NonNull tag: String, @NonNull description: T) {
-        if (dbHandler != null && loggingEnabled) {
+        if (loggingEnabled) {
             Log.i(tag, description.toString())
             tryToWriteToDatabase(tag, description, Severity.Info)
         }
     }
 
     fun <T> warning(@NonNull tag: String, @NonNull description: T) {
-        if (dbHandler != null && loggingEnabled) {
+        if (loggingEnabled) {
             Log.w(tag, description.toString())
             tryToWriteToDatabase(tag, description, Severity.Warning)
         }
     }
 
     fun <T> error(@NonNull tag: String, @NonNull description: T) {
-        if (dbHandler != null && loggingEnabled) {
+        if (loggingEnabled) {
             Log.e(tag, description.toString())
             tryToWriteToDatabase(tag, description, Severity.Error)
         }

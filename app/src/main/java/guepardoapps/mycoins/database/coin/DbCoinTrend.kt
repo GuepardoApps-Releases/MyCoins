@@ -9,13 +9,14 @@ import guepardoapps.mycoins.enums.Currency
 import guepardoapps.mycoins.enums.DbAction
 import guepardoapps.mycoins.models.CoinTrend
 import guepardoapps.mycoins.publishsubject.DbCoinTrendActionPublishSubject
+import guepardoapps.mycoins.utils.Logger
 
 // Helpful
 // https://developer.android.com/training/data-storage/sqlite
 // https://www.techotopia.com/index.php/A_Kotlin_Android_SQLite_Database_Tutorial
 
-internal class DbCoinTrend(context: Context)
-    : SQLiteOpenHelper(context, DatabaseName, null, DatabaseVersion) {
+internal class DbCoinTrend(context: Context) : SQLiteOpenHelper(context, DatabaseName, null, DatabaseVersion) {
+    private val tag: String = DbCoinTrend::class.java.simpleName
 
     override fun onCreate(database: SQLiteDatabase) {
         val createTable = (
@@ -44,6 +45,8 @@ internal class DbCoinTrend(context: Context)
     }
 
     fun add(coinCurrency: CoinTrend): Long {
+        Logger.instance.debug(tag, "add: $coinCurrency")
+
         val values = ContentValues().apply {
             put(ColumnCoinTypeId, coinCurrency.coinType.id)
             put(ColumnTime, coinCurrency.time)
@@ -62,6 +65,8 @@ internal class DbCoinTrend(context: Context)
     }
 
     fun update(coinCurrency: CoinTrend): Int {
+        Logger.instance.debug(tag, "update: $coinCurrency")
+
         val values = ContentValues().apply {
             put(ColumnCoinTypeId, coinCurrency.coinType.id)
             put(ColumnTime, coinCurrency.time)
@@ -83,6 +88,8 @@ internal class DbCoinTrend(context: Context)
     }
 
     fun delete(coinCurrency: CoinTrend): Int {
+        Logger.instance.debug(tag, "delete: $coinCurrency")
+
         val database = this.writableDatabase
 
         val selection = "$ColumnId LIKE ?"
@@ -94,6 +101,8 @@ internal class DbCoinTrend(context: Context)
     }
 
     fun get(): MutableList<CoinTrend> {
+        Logger.instance.debug(tag, "get")
+
         val database = this.readableDatabase
 
         val projection = arrayOf(
@@ -146,6 +155,8 @@ internal class DbCoinTrend(context: Context)
     }
 
     fun findByCoinType(coinType: CoinType): MutableList<CoinTrend> {
+        Logger.instance.debug(tag, "findByCoinType: $coinType")
+
         val database = this.readableDatabase
 
         val projection = arrayOf(
@@ -196,6 +207,14 @@ internal class DbCoinTrend(context: Context)
 
         DbCoinTrendActionPublishSubject.instance.publishSubject.onNext(DbAction.Get)
         return list
+    }
+
+    fun clear() {
+        Logger.instance.debug(tag, "clear")
+
+        for (value in get()) {
+            delete(value)
+        }
     }
 
     companion object {

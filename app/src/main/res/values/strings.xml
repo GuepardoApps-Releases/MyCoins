@@ -12,6 +12,7 @@
     <string name="back">Back</string>
     <string name="set_bubble_state">Activate floating notification</string>
     <string name="settings">Settings</string>
+    <string name="sum">Sum</string>
 
     <string name="prompt">Prompt</string>
     <string name="ok">OK</string>

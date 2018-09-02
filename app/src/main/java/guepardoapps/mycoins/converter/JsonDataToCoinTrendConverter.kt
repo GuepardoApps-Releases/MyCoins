@@ -18,6 +18,7 @@ internal class JsonDataToCoinTrendConverter : IJsonDataToCoinTrendConverter {
 
     override fun convertResponseToList(jsonString: String, coinType: CoinType, currency: Currency): MutableList<CoinTrend> {
         val list = mutableListOf<CoinTrend>()
+        Logger.instance.verbose(tag, jsonString)
 
         try {
             val jsonObject = JSONObject(jsonString)

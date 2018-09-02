@@ -8,13 +8,14 @@ import guepardoapps.mycoins.enums.CoinType
 import guepardoapps.mycoins.enums.DbAction
 import guepardoapps.mycoins.models.CoinConversion
 import guepardoapps.mycoins.publishsubject.DbCoinConversionActionPublishSubject
+import guepardoapps.mycoins.utils.Logger
 
 // Helpful
 // https://developer.android.com/training/data-storage/sqlite
 // https://www.techotopia.com/index.php/A_Kotlin_Android_SQLite_Database_Tutorial
 
-internal class DbCoinConversion(context: Context)
-    : SQLiteOpenHelper(context, DatabaseName, null, DatabaseVersion) {
+internal class DbCoinConversion(context: Context) : SQLiteOpenHelper(context, DatabaseName, null, DatabaseVersion) {
+    private val tag: String = DbCoinConversion::class.java.simpleName
 
     override fun onCreate(database: SQLiteDatabase) {
         val createTable = (
@@ -39,6 +40,8 @@ internal class DbCoinConversion(context: Context)
     }
 
     fun add(coinConversion: CoinConversion): Long {
+        Logger.instance.debug(tag, "add: $coinConversion")
+
         val values = ContentValues().apply {
             put(ColumnCoinTypeId, coinConversion.coinType.id)
             put(ColumnEurValue, coinConversion.eurValue)
@@ -53,6 +56,8 @@ internal class DbCoinConversion(context: Context)
     }
 
     fun update(coinConversion: CoinConversion): Int {
+        Logger.instance.debug(tag, "update: $coinConversion")
+
         val values = ContentValues().apply {
             put(ColumnCoinTypeId, coinConversion.coinType.id)
             put(ColumnEurValue, coinConversion.eurValue)
@@ -70,6 +75,8 @@ internal class DbCoinConversion(context: Context)
     }
 
     fun delete(coinConversion: CoinConversion): Int {
+        Logger.instance.debug(tag, "delete: $coinConversion")
+
         val database = this.writableDatabase
 
         val selection = "$ColumnId LIKE ?"
@@ -81,6 +88,8 @@ internal class DbCoinConversion(context: Context)
     }
 
     fun get(): MutableList<CoinConversion> {
+        Logger.instance.debug(tag, "get")
+
         val database = this.readableDatabase
 
         val projection = arrayOf(ColumnId, ColumnCoinTypeId, ColumnEurValue, ColumnUsDollarValue)
@@ -115,6 +124,8 @@ internal class DbCoinConversion(context: Context)
     }
 
     fun findByCoinType(coinType: CoinType): MutableList<CoinConversion> {
+        Logger.instance.debug(tag, "findByCoinType: $coinType")
+
         val database = this.readableDatabase
 
         val projection = arrayOf(ColumnId, ColumnCoinTypeId, ColumnEurValue, ColumnUsDollarValue)
@@ -147,6 +158,14 @@ internal class DbCoinConversion(context: Context)
 
         DbCoinConversionActionPublishSubject.instance.publishSubject.onNext(DbAction.Get)
         return list
+    }
+
+    fun clear() {
+        Logger.instance.debug(tag, "clear")
+
+        for (value in get()) {
+            delete(value)
+        }
     }
 
     companion object {

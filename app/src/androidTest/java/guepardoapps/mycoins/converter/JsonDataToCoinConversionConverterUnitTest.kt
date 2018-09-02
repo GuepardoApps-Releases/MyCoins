@@ -1,7 +1,7 @@
 package guepardoapps.mycoins.converter
 
 import guepardoapps.mycoins.enums.CoinType
-import guepardoapps.mycoins.models.CoinConversion
+import guepardoapps.mycoins.models.Coin
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.describe
 import org.jetbrains.spek.api.dsl.it
@@ -28,19 +28,10 @@ class JsonDataToCoinConversionConverterUnitTest : Spek({
                     "\"DASH\":{\"EUR\":177.4,\"USD\":207.35}" +
                     "}"
 
-            val btcCoinConversion = CoinConversion()
-            btcCoinConversion.id = 1
-            btcCoinConversion.coinType = CoinType.Btc
-            btcCoinConversion.eurValue = 0.0
-            btcCoinConversion.usDollarValue = 0.0
+            val btnCoin = Coin(0, CoinType.Btc, 1.0)
+            val dashCoin = Coin(1, CoinType.Dash, 11.0)
 
-            val dashCoinConversion = CoinConversion()
-            dashCoinConversion.id = 2
-            dashCoinConversion.coinType = CoinType.Dash
-            dashCoinConversion.eurValue = 0.0
-            dashCoinConversion.usDollarValue = 0.0
-
-            val list = mutableListOf(btcCoinConversion, dashCoinConversion)
+            val list = mutableListOf(btnCoin, dashCoin)
 
             // Act
             val actual = jsonDataToCoinConversionConverter.convertResponseToList(jsonStringToTest, list)

@@ -8,13 +8,14 @@ import guepardoapps.mycoins.enums.CoinType
 import guepardoapps.mycoins.enums.DbAction
 import guepardoapps.mycoins.models.Coin
 import guepardoapps.mycoins.publishsubject.DbCoinActionPublishSubject
+import guepardoapps.mycoins.utils.Logger
 
 // Helpful
 // https://developer.android.com/training/data-storage/sqlite
 // https://www.techotopia.com/index.php/A_Kotlin_Android_SQLite_Database_Tutorial
 
-internal class DbCoin(context: Context)
-    : SQLiteOpenHelper(context, DatabaseName, null, DatabaseVersion) {
+internal class DbCoin(context: Context) : SQLiteOpenHelper(context, DatabaseName, null, DatabaseVersion) {
+    private val tag: String = DbCoin::class.java.simpleName
 
     override fun onCreate(database: SQLiteDatabase) {
         val createTable = (
@@ -38,6 +39,8 @@ internal class DbCoin(context: Context)
     }
 
     fun add(coin: Coin): Long {
+        Logger.instance.debug(tag, "add: $coin")
+
         val values = ContentValues().apply {
             put(ColumnCoinTypeId, coin.coinType.id)
             put(ColumnAmount, coin.amount)
@@ -51,6 +54,8 @@ internal class DbCoin(context: Context)
     }
 
     fun update(coin: Coin): Int {
+        Logger.instance.debug(tag, "update: $coin")
+
         val values = ContentValues().apply {
             put(ColumnCoinTypeId, coin.coinType.id)
             put(ColumnAmount, coin.amount)
@@ -67,6 +72,8 @@ internal class DbCoin(context: Context)
     }
 
     fun delete(coin: Coin): Int {
+        Logger.instance.debug(tag, "delete: $coin")
+
         val database = this.writableDatabase
 
         val selection = "$ColumnId LIKE ?"
@@ -78,6 +85,8 @@ internal class DbCoin(context: Context)
     }
 
     fun get(): MutableList<Coin> {
+        Logger.instance.debug(tag, "get")
+
         val database = this.readableDatabase
 
         val projection = arrayOf(ColumnId, ColumnCoinTypeId, ColumnAmount)
@@ -105,6 +114,8 @@ internal class DbCoin(context: Context)
     }
 
     fun findById(id: Int): MutableList<Coin> {
+        Logger.instance.debug(tag, "findById: $id")
+
         val database = this.readableDatabase
 
         val projection = arrayOf(ColumnId, ColumnCoinTypeId, ColumnAmount)
@@ -131,6 +142,14 @@ internal class DbCoin(context: Context)
 
         DbCoinActionPublishSubject.instance.publishSubject.onNext(DbAction.Get)
         return list
+    }
+
+    fun clear() {
+        Logger.instance.debug(tag, "clear")
+
+        for (value in get()) {
+            delete(value)
+        }
     }
 
     companion object {

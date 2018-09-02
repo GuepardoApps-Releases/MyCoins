@@ -11,6 +11,8 @@ class MyCoinsApp : Application() {
         super.onCreate()
 
         Logger.instance.initialize(this)
+        // Logger.instance.loggingEnabled = BuildConfig.DEBUG
+        Logger.instance.loggingEnabled = false
         Logger.instance.debug(tag, "onCreate")
 
         CoinService.instance.initialize(this)
