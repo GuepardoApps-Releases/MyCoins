@@ -13,8 +13,6 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.Locale;
 
-import guepardoapps.mycoins.utils.Tools;
-
 public class DownloadController {
     public enum DownloadType implements Serializable {
         CoinConversion, CoinAggregateEur, CoinAggregateUsd

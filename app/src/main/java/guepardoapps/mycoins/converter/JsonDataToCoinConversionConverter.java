@@ -4,7 +4,6 @@ import android.support.annotation.NonNull;
 
 import guepardoapps.mycoins.models.SerializableList;
 import guepardoapps.mycoins.models.SerializableTriple;
-import guepardoapps.mycoins.utils.StringHelper;
 
 public class JsonDataToCoinConversionConverter {
     private static final String TAG = JsonDataToCoinConversionConverter.class.getSimpleName();

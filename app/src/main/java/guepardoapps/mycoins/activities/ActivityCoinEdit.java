@@ -20,7 +20,6 @@ import de.mateware.snacky.Snacky;
 import guepardoapps.mycoins.services.CoinService;
 import guepardoapps.mycoins.R;
 import guepardoapps.mycoins.models.CoinDto;
-import guepardoapps.mycoins.controller.ReceiverController;
 
 public class ActivityCoinEdit extends AppCompatActivity {
     private static final String TAG = ActivityCoinEdit.class.getSimpleName();

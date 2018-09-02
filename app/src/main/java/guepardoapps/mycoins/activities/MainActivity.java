@@ -15,8 +15,6 @@ import android.widget.ListView;
 import guepardoapps.mycoins.services.CoinService;
 import guepardoapps.mycoins.R;
 import guepardoapps.mycoins.models.CoinDto;
-import guepardoapps.mycoins.controller.NavigationController;
-import guepardoapps.mycoins.controller.ReceiverController;
 import guepardoapps.mycoins.controller.SettingsController;
 import guepardoapps.mycoins.customadapter.CoinListAdapter;
 

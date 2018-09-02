@@ -5,13 +5,9 @@ import android.support.annotation.NonNull;
 import java.io.Serializable;
 import java.util.Locale;
 
-import guepardoapps.mycoins.enums.Currency;
-
 public class CoinDto implements Serializable {
     private static final long serialVersionUID = 8473643947363954860L;
     private static final String TAG = CoinDto.class.getSimpleName();
-
-    public enum Action {NULL, Add, Update}
 
     public enum Aggregation {NULL, Fall, Rise}
 

@@ -9,7 +9,6 @@ import android.view.KeyEvent;
 import android.view.View;
 
 import guepardoapps.mycoins.R;
-import guepardoapps.mycoins.controller.MailController;
 
 public class ActivityImpressum extends Activity {
     private static final String TAG = ActivityImpressum.class.getSimpleName();

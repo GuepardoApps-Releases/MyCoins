@@ -23,8 +23,6 @@ import guepardoapps.mycoins.services.CoinService;
 import guepardoapps.mycoins.R;
 import guepardoapps.mycoins.activities.ActivityCoinEdit;
 import guepardoapps.mycoins.models.CoinDto;
-import guepardoapps.mycoins.enums.Currency;
-import guepardoapps.mycoins.controller.NavigationController;
 
 public class CoinListAdapter extends BaseAdapter {
     private static final String TAG = CoinListAdapter.class.getSimpleName();

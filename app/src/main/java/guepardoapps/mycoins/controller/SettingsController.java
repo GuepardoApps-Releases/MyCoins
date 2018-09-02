@@ -3,8 +3,6 @@ package guepardoapps.mycoins.controller;
 import android.content.Context;
 import android.support.annotation.NonNull;
 
-import guepardoapps.mycoins.enums.Currency;
-
 public class SettingsController {
     private static final SettingsController SINGLETON = new SettingsController();
 
