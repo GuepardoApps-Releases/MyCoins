@@ -1,6 +1,6 @@
 # MyCoins - development branch
 
-[![PlayStore}(https://img.shields.io/badge/PlayStore-MyCoins-blue.svg)](https://play.google.com/store/apps/details?id=guepardoapps.mycoins)
+[![PlayStore](https://img.shields.io/badge/PlayStore-MyCoins-blue.svg)](https://play.google.com/store/apps/details?id=guepardoapps.mycoins)
 
 [![Platform](https://img.shields.io/badge/platform-Android-blue.svg)](https://www.android.com)
 <a target="_blank" href="https://android-arsenal.com/api?level=17" title="API17+"><img src="https://img.shields.io/badge/API-17+-blue.svg" /></a>
