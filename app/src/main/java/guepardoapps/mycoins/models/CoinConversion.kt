@@ -1,14 +1,13 @@
 package guepardoapps.mycoins.models
 
 import guepardoapps.mycoins.annotations.JsonKey
-import guepardoapps.mycoins.enums.CoinType
 
 @JsonKey("", "")
 internal class CoinConversion {
     private val tag: String = CoinConversion::class.java.simpleName
 
     var id: Int = 0
-    var coinType: CoinType = CoinType.Null
+    var coinType: CoinType = CoinTypes.Null
 
     @JsonKey("", "EUR")
     var eurValue: Double = 0.0

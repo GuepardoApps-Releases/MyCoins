@@ -3,6 +3,7 @@ package guepardoapps.mycoins.extensions
 import guepardoapps.mycoins.annotations.JsonKey
 import guepardoapps.mycoins.enums.Trend
 import guepardoapps.mycoins.models.CoinTrend
+import guepardoapps.mycoins.utils.Logger
 import kotlin.reflect.full.declaredMemberProperties
 
 internal fun CoinTrend.getJsonKey(): JsonKey {
@@ -13,31 +14,19 @@ internal fun CoinTrend.getPropertyJsonKey(propertyName: String): JsonKey {
     return this::class.declaredMemberProperties.find { it.name == propertyName }?.annotations?.find { it is JsonKey } as JsonKey
 }
 
-internal fun ArrayList<CoinTrend>.getTrend(): Trend {
-    if (this.isEmpty() || this.size == 1) {
+internal fun MutableList<CoinTrend>.getTrend(): Trend {
+    if (this.isEmpty()) {
+        Logger.instance.debug("getTrend", "difference isEmpty")
         return Trend.Null
     }
 
-    val first = this[0]
-    val last = this.last()
-
-    val difference = last.closeValue - first.openValue
-    return when {
+    val difference = this.last().closeValue - this.first().openValue
+    val icon = when {
         difference > 0 -> Trend.Rise
         difference < 0 -> Trend.Fall
         else -> Trend.Null
     }
-}
 
-internal fun MutableList<CoinTrend>.missingInNew(newList: MutableList<CoinTrend>): MutableList<CoinTrend> {
-    val missingList = mutableListOf<CoinTrend>()
-
-    for (value in this) {
-        val found = newList.find { x -> x.coinType.id == value.coinType.id }
-        if (found == null) {
-            missingList.add(value)
-        }
-    }
-
-    return missingList
+    Logger.instance.debug("getTrend", "difference is $difference and icon should be $icon")
+    return icon
 }

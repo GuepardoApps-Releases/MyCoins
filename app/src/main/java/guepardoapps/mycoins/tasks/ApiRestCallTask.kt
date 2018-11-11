@@ -1,8 +1,8 @@
 package guepardoapps.mycoins.tasks
 
 import android.os.AsyncTask
-import guepardoapps.mycoins.enums.CoinType
 import guepardoapps.mycoins.enums.DownloadType
+import guepardoapps.mycoins.models.CoinTypes
 import guepardoapps.mycoins.services.api.OnApiServiceListener
 import guepardoapps.mycoins.utils.Logger
 import okhttp3.OkHttpClient
@@ -12,7 +12,7 @@ internal class ApiRestCallTask : AsyncTask<String, Void, String>() {
     private val tag: String = ApiRestCallTask::class.java.simpleName
 
     var downloadType = DownloadType.Null
-    var coinType = CoinType.Null
+    var coinType = CoinTypes.Null
     lateinit var onApiServiceListener: OnApiServiceListener
 
     override fun doInBackground(vararg requestUrls: String?): String {
@@ -47,6 +47,6 @@ internal class ApiRestCallTask : AsyncTask<String, Void, String>() {
             return
         }
 
-        onApiServiceListener.onFinished(downloadType, coinType, result!!, true)
+        onApiServiceListener.onFinished(downloadType, coinType, result, true)
     }
 }

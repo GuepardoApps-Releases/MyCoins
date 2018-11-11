@@ -16,9 +16,9 @@ import com.evernote.android.state.State
 import com.evernote.android.state.StateSaver
 import guepardoapps.mycoins.R
 import guepardoapps.mycoins.common.Constants
-import guepardoapps.mycoins.enums.CoinType
 import guepardoapps.mycoins.extensions.byString
 import guepardoapps.mycoins.models.Coin
+import guepardoapps.mycoins.models.CoinTypes
 import guepardoapps.mycoins.services.coin.CoinService
 import kotlinx.android.synthetic.main.side_edit.*
 
@@ -51,9 +51,10 @@ class ActivityEdit : Activity() {
             }
         }
 
-        coin_type_edit_textview.setAdapter(ArrayAdapter<String>(this, android.R.layout.simple_dropdown_item_1line, CoinType.values().map { x -> x.type }))
+        coin_type_edit_textview.setAdapter(ArrayAdapter<String>(this, android.R.layout.simple_dropdown_item_1line, CoinTypes.values.map { x -> x.type }))
         coin_type_edit_textview.addTextChangedListener(textWatcher)
         coin_amount_edit_textview.addTextChangedListener(textWatcher)
+        coin_additionalInformation_edit_textview.addTextChangedListener(textWatcher)
 
         val data = intent.extras
         if (data != null) {
@@ -62,6 +63,7 @@ class ActivityEdit : Activity() {
             if (coin != null) {
                 coin_type_edit_textview.setText(coin?.coinType?.type)
                 coin_amount_edit_textview.setText(coin?.amount?.toString())
+                coin_additionalInformation_edit_textview.setText(coin?.additionalInformation)
             }
         }
 
@@ -88,13 +90,14 @@ class ActivityEdit : Activity() {
             if (cancel) {
                 focusView?.requestFocus()
             } else {
-                val coinType = CoinType.values().byString(coinTypeString)
+                val coinType = CoinTypes.values.byString(coinTypeString)
                 val amount = amountString.toDouble()
+                val additionalInformation = coin_additionalInformation_edit_textview.text.toString()
 
                 if (coin != null) {
-                    CoinService.instance.updateCoin(Coin(coin?.id!!, coinType, amount))
+                    CoinService.instance.updateCoin(Coin(coin?.id!!, coinType, amount, additionalInformation))
                 } else {
-                    CoinService.instance.addCoin(Coin(0, coinType, amount))
+                    CoinService.instance.addCoin(Coin(0, coinType, amount, additionalInformation))
                 }
 
                 finish()

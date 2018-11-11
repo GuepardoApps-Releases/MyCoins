@@ -4,10 +4,13 @@ import android.content.ContentValues
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.content.Context
-import guepardoapps.mycoins.enums.CoinType
+import guepardoapps.mycoins.models.CoinType
 import guepardoapps.mycoins.enums.Currency
 import guepardoapps.mycoins.enums.DbAction
+import guepardoapps.mycoins.extensions.byString
 import guepardoapps.mycoins.models.CoinTrend
+import guepardoapps.mycoins.models.CoinTypes
+import guepardoapps.mycoins.models.DbPublishSubject
 import guepardoapps.mycoins.publishsubject.DbCoinTrendActionPublishSubject
 import guepardoapps.mycoins.utils.Logger
 
@@ -23,7 +26,7 @@ internal class DbCoinTrend(context: Context) : SQLiteOpenHelper(context, Databas
                 "CREATE TABLE IF NOT EXISTS $DatabaseTable"
                         + "("
                         + "$ColumnId INTEGER PRIMARY KEY autoincrement,"
-                        + "$ColumnCoinTypeId INTEGER,"
+                        + "$ColumnCoinType TEXT,"
                         + "$ColumnTime BIGINT,"
                         + "$ColumnOpenValue DOUBLE,"
                         + "$ColumnCloseValue DOUBLE,"
@@ -32,7 +35,7 @@ internal class DbCoinTrend(context: Context) : SQLiteOpenHelper(context, Databas
                         + "$ColumnCurrency INT"
                         + ")")
         database.execSQL(createTable)
-        DbCoinTrendActionPublishSubject.instance.publishSubject.onNext(DbAction.Null)
+        DbCoinTrendActionPublishSubject.instance.publishSubject.onNext(DbPublishSubject(DbAction.Null, 1f))
     }
 
     override fun onUpgrade(database: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
@@ -44,11 +47,11 @@ internal class DbCoinTrend(context: Context) : SQLiteOpenHelper(context, Databas
         onUpgrade(database, oldVersion, newVersion)
     }
 
-    fun add(coinCurrency: CoinTrend): Long {
+    fun add(coinCurrency: CoinTrend, currentActionNo: Float = 1f, totalActions: Float = 1f): Long {
         Logger.instance.debug(tag, "add: $coinCurrency")
 
         val values = ContentValues().apply {
-            put(ColumnCoinTypeId, coinCurrency.coinType.id)
+            put(ColumnCoinType, coinCurrency.coinType.type)
             put(ColumnTime, coinCurrency.time)
             put(ColumnOpenValue, coinCurrency.openValue)
             put(ColumnCloseValue, coinCurrency.closeValue)
@@ -60,34 +63,11 @@ internal class DbCoinTrend(context: Context) : SQLiteOpenHelper(context, Databas
         val database = this.writableDatabase
         val returnValue = database.insert(DatabaseTable, null, values)
 
-        DbCoinTrendActionPublishSubject.instance.publishSubject.onNext(DbAction.Add)
+        DbCoinTrendActionPublishSubject.instance.publishSubject.onNext(DbPublishSubject(DbAction.Add, currentActionNo / totalActions))
         return returnValue
     }
 
-    fun update(coinCurrency: CoinTrend): Int {
-        Logger.instance.debug(tag, "update: $coinCurrency")
-
-        val values = ContentValues().apply {
-            put(ColumnCoinTypeId, coinCurrency.coinType.id)
-            put(ColumnTime, coinCurrency.time)
-            put(ColumnOpenValue, coinCurrency.openValue)
-            put(ColumnCloseValue, coinCurrency.closeValue)
-            put(ColumnLowValue, coinCurrency.lowValue)
-            put(ColumnHighValue, coinCurrency.highValue)
-            put(ColumnCurrency, coinCurrency.currency.id)
-        }
-
-        val selection = "$ColumnId LIKE ?"
-        val selectionArgs = arrayOf(coinCurrency.id.toString())
-
-        val database = this.writableDatabase
-        val returnValue = database.update(DatabaseTable, values, selection, selectionArgs)
-
-        DbCoinTrendActionPublishSubject.instance.publishSubject.onNext(DbAction.Update)
-        return returnValue
-    }
-
-    fun delete(coinCurrency: CoinTrend): Int {
+    fun delete(coinCurrency: CoinTrend, currentActionNo: Float = 1f, totalActions: Float = 1f): Int {
         Logger.instance.debug(tag, "delete: $coinCurrency")
 
         val database = this.writableDatabase
@@ -96,7 +76,7 @@ internal class DbCoinTrend(context: Context) : SQLiteOpenHelper(context, Databas
         val selectionArgs = arrayOf(coinCurrency.id.toString())
         val returnValue = database.delete(DatabaseTable, selection, selectionArgs)
 
-        DbCoinTrendActionPublishSubject.instance.publishSubject.onNext(DbAction.Delete)
+        DbCoinTrendActionPublishSubject.instance.publishSubject.onNext(DbPublishSubject(DbAction.Delete, currentActionNo / totalActions))
         return returnValue
     }
 
@@ -107,7 +87,7 @@ internal class DbCoinTrend(context: Context) : SQLiteOpenHelper(context, Databas
 
         val projection = arrayOf(
                 ColumnId,
-                ColumnCoinTypeId,
+                ColumnCoinType,
                 ColumnTime,
                 ColumnOpenValue,
                 ColumnCloseValue,
@@ -125,7 +105,6 @@ internal class DbCoinTrend(context: Context) : SQLiteOpenHelper(context, Databas
         with(cursor) {
             while (moveToNext()) {
                 val id = getInt(getColumnIndexOrThrow(ColumnId))
-                val coinTypeId = getInt(getColumnIndexOrThrow(ColumnCoinTypeId))
                 val time = getLong(getColumnIndexOrThrow(ColumnTime))
                 val openValue = getDouble(getColumnIndexOrThrow(ColumnOpenValue))
                 val closeValue = getDouble(getColumnIndexOrThrow(ColumnCloseValue))
@@ -133,7 +112,10 @@ internal class DbCoinTrend(context: Context) : SQLiteOpenHelper(context, Databas
                 val highValue = getDouble(getColumnIndexOrThrow(ColumnHighValue))
                 val currencyId = getInt(getColumnIndexOrThrow(ColumnCurrency))
 
-                val coinType = CoinType.values()[coinTypeId]
+                val coinTypeString = getString(getColumnIndexOrThrow(ColumnCoinType))
+                val coinType = CoinTypes.values.byString(coinTypeString)
+                if (coinType == CoinTypes.Null) coinType.type = coinTypeString
+
                 val currency = Currency.values()[currencyId]
 
                 val coinCurrency = CoinTrend()
@@ -150,7 +132,7 @@ internal class DbCoinTrend(context: Context) : SQLiteOpenHelper(context, Databas
             }
         }
 
-        DbCoinTrendActionPublishSubject.instance.publishSubject.onNext(DbAction.Get)
+        DbCoinTrendActionPublishSubject.instance.publishSubject.onNext(DbPublishSubject(DbAction.Get, 1f))
         return list
     }
 
@@ -161,7 +143,7 @@ internal class DbCoinTrend(context: Context) : SQLiteOpenHelper(context, Databas
 
         val projection = arrayOf(
                 ColumnId,
-                ColumnCoinTypeId,
+                ColumnCoinType,
                 ColumnTime,
                 ColumnOpenValue,
                 ColumnCloseValue,
@@ -169,14 +151,11 @@ internal class DbCoinTrend(context: Context) : SQLiteOpenHelper(context, Databas
                 ColumnHighValue,
                 ColumnCurrency)
 
-        val selection = "$ColumnCoinTypeId = ?"
-        val selectionArgs = arrayOf(coinType.id.toString())
-
-        val sortOrder = "$ColumnId ASC"
-
         val cursor = database.query(
-                DatabaseTable, projection, selection, selectionArgs,
-                null, null, sortOrder)
+                DatabaseTable, projection,
+                "$ColumnCoinType = '${coinType.type}'",
+                null, null, null,
+                "$ColumnId ASC")
 
         val list = mutableListOf<CoinTrend>()
         with(cursor) {
@@ -205,15 +184,16 @@ internal class DbCoinTrend(context: Context) : SQLiteOpenHelper(context, Databas
             }
         }
 
-        DbCoinTrendActionPublishSubject.instance.publishSubject.onNext(DbAction.Get)
+        DbCoinTrendActionPublishSubject.instance.publishSubject.onNext(DbPublishSubject(DbAction.Get, 1f))
         return list
     }
 
-    fun clear() {
+    fun clear(coinType: CoinType) {
         Logger.instance.debug(tag, "clear")
 
-        for (value in get()) {
-            delete(value)
+        val coinTrendList = findByCoinType(coinType)
+        for ((index, value) in coinTrendList.withIndex()) {
+            delete(value, index.toFloat(), coinTrendList.size.toFloat())
         }
     }
 
@@ -223,7 +203,7 @@ internal class DbCoinTrend(context: Context) : SQLiteOpenHelper(context, Databas
         private const val DatabaseTable = "coinCurrencyTable"
 
         private const val ColumnId = "_id"
-        private const val ColumnCoinTypeId = "coinTypeId"
+        private const val ColumnCoinType = "coinType"
         private const val ColumnTime = "time"
         private const val ColumnOpenValue = "openValue"
         private const val ColumnCloseValue = "closeValue"

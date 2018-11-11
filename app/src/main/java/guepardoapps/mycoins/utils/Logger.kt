@@ -11,7 +11,7 @@ import java.util.*
 
 internal class Logger private constructor() {
     var loggingEnabled: Boolean = true
-    private var writeToDatabaseEnabled: Boolean = true
+    var writeToDatabaseEnabled: Boolean = true
     private var dbHandler: DbLogging? = null
 
     private object Holder {
