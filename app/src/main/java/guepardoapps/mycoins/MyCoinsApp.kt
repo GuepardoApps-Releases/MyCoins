@@ -13,6 +13,7 @@ class MyCoinsApp : Application() {
         Logger.instance.initialize(this)
         // Logger.instance.loggingEnabled = BuildConfig.DEBUG
         Logger.instance.loggingEnabled = false
+        Logger.instance.writeToDatabaseEnabled = false
         Logger.instance.debug(tag, "onCreate")
 
         CoinService.instance.initialize(this)

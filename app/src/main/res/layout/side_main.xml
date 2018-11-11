@@ -6,25 +6,43 @@
     android:layout_height="match_parent"
     tools:context=".activities.ActivityMain">
 
-    <FrameLayout
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_above="@+id/bottomNavigation">
+        android:layout_height="match_parent">
+
+        <Spinner
+            android:id="@+id/sortFieldSpinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@id/sortDirectionButton"
+            android:layout_alignBottom="@id/sortDirectionButton"
+            android:layout_alignParentStart="true"
+            android:layout_toStartOf="@id/sortDirectionButton" />
+
+        <ToggleButton
+            android:id="@+id/sortDirectionButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:textOff="DESC"
+            android:textOn="ASC" />
 
         <ListView
             android:id="@+id/listView"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-    </FrameLayout>
+            android:layout_height="match_parent"
+            android:layout_above="@id/bottomNavigation"
+            android:layout_below="@id/sortDirectionButton" />
 
-    <it.sephiroth.android.library.bottomnavigation.BottomNavigation
-        android:id="@+id/bottomNavigation"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        app:bbn_badgeProvider="@string/bbn_badgeProvider"
-        app:bbn_entries="@menu/bottombar_menu"
-        app:bbn_scrollEnabled="true"
-        app:layout_behavior="@string/bbn_phone_view_behavior" />
+        <it.sephiroth.android.library.bottomnavigation.BottomNavigation
+            android:id="@+id/bottomNavigation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            app:bbn_badgeProvider="@string/bbn_badgeProvider"
+            app:bbn_entries="@menu/bottombar_menu"
+            app:bbn_scrollEnabled="true"
+            app:layout_behavior="@string/bbn_phone_view_behavior" />
+    </RelativeLayout>
 
 </android.support.design.widget.CoordinatorLayout>

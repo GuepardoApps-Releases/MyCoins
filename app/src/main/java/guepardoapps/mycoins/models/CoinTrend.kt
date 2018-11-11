@@ -1,7 +1,6 @@
 package guepardoapps.mycoins.models
 
 import guepardoapps.mycoins.annotations.JsonKey
-import guepardoapps.mycoins.enums.CoinType
 import guepardoapps.mycoins.enums.Currency
 
 @JsonKey("", "Data")
@@ -26,8 +25,8 @@ internal class CoinTrend {
     @JsonKey("", "high")
     var highValue: Double = 0.0
 
-    var coinType: CoinType = CoinType.Null
-    var currency: Currency = Currency.Null
+    var coinType: CoinType = CoinTypes.Null
+    var currency: Currency = Currency.EUR
 
     override fun toString(): String {
         return "{Class: $tag, Id: $id, Time: $time, OpenValue: $openValue, CloseValue: $closeValue, LowValue: $lowValue, HighValue: $highValue, CoinType: $coinType, Currency: $currency}"

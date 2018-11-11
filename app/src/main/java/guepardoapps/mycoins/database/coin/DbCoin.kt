@@ -4,9 +4,11 @@ import android.content.ContentValues
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.content.Context
-import guepardoapps.mycoins.enums.CoinType
 import guepardoapps.mycoins.enums.DbAction
+import guepardoapps.mycoins.extensions.byString
 import guepardoapps.mycoins.models.Coin
+import guepardoapps.mycoins.models.CoinTypes
+import guepardoapps.mycoins.models.DbPublishSubject
 import guepardoapps.mycoins.publishsubject.DbCoinActionPublishSubject
 import guepardoapps.mycoins.utils.Logger
 
@@ -22,11 +24,12 @@ internal class DbCoin(context: Context) : SQLiteOpenHelper(context, DatabaseName
                 "CREATE TABLE IF NOT EXISTS $DatabaseTable"
                         + "("
                         + "$ColumnId INTEGER PRIMARY KEY autoincrement,"
-                        + "$ColumnCoinTypeId INTEGER,"
-                        + "$ColumnAmount DOUBLE"
+                        + "$ColumnCoinType TEXT,"
+                        + "$ColumnAmount DOUBLE,"
+                        + "$ColumnAdditionalInformation TEXT"
                         + ")")
         database.execSQL(createTable)
-        DbCoinActionPublishSubject.instance.publishSubject.onNext(DbAction.Null)
+        DbCoinActionPublishSubject.instance.publishSubject.onNext(DbPublishSubject(DbAction.Null, 1f))
     }
 
     override fun onUpgrade(database: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
@@ -38,27 +41,29 @@ internal class DbCoin(context: Context) : SQLiteOpenHelper(context, DatabaseName
         onUpgrade(database, oldVersion, newVersion)
     }
 
-    fun add(coin: Coin): Long {
+    fun add(coin: Coin, currentActionNo: Float = 1f, totalActions: Float = 1f): Long {
         Logger.instance.debug(tag, "add: $coin")
 
         val values = ContentValues().apply {
-            put(ColumnCoinTypeId, coin.coinType.id)
+            put(ColumnCoinType, coin.coinType.type)
             put(ColumnAmount, coin.amount)
+            put(ColumnAdditionalInformation, coin.additionalInformation)
         }
 
         val database = this.writableDatabase
         val returnValue = database.insert(DatabaseTable, null, values)
 
-        DbCoinActionPublishSubject.instance.publishSubject.onNext(DbAction.Add)
+        DbCoinActionPublishSubject.instance.publishSubject.onNext(DbPublishSubject(DbAction.Add, currentActionNo / totalActions))
         return returnValue
     }
 
-    fun update(coin: Coin): Int {
+    fun update(coin: Coin, currentActionNo: Float = 1f, totalActions: Float = 1f): Int {
         Logger.instance.debug(tag, "update: $coin")
 
         val values = ContentValues().apply {
-            put(ColumnCoinTypeId, coin.coinType.id)
+            put(ColumnCoinType, coin.coinType.type)
             put(ColumnAmount, coin.amount)
+            put(ColumnAdditionalInformation, coin.additionalInformation)
         }
 
         val selection = "$ColumnId LIKE ?"
@@ -67,11 +72,11 @@ internal class DbCoin(context: Context) : SQLiteOpenHelper(context, DatabaseName
         val database = this.writableDatabase
         val returnValue = database.update(DatabaseTable, values, selection, selectionArgs)
 
-        DbCoinActionPublishSubject.instance.publishSubject.onNext(DbAction.Update)
+        DbCoinActionPublishSubject.instance.publishSubject.onNext(DbPublishSubject(DbAction.Update, currentActionNo / totalActions))
         return returnValue
     }
 
-    fun delete(coin: Coin): Int {
+    fun delete(coin: Coin, currentActionNo: Float = 1f, totalActions: Float = 1f): Int {
         Logger.instance.debug(tag, "delete: $coin")
 
         val database = this.writableDatabase
@@ -80,7 +85,7 @@ internal class DbCoin(context: Context) : SQLiteOpenHelper(context, DatabaseName
         val selectionArgs = arrayOf(coin.id.toString())
         val returnValue = database.delete(DatabaseTable, selection, selectionArgs)
 
-        DbCoinActionPublishSubject.instance.publishSubject.onNext(DbAction.Delete)
+        DbCoinActionPublishSubject.instance.publishSubject.onNext(DbPublishSubject(DbAction.Delete, currentActionNo / totalActions))
         return returnValue
     }
 
@@ -89,7 +94,7 @@ internal class DbCoin(context: Context) : SQLiteOpenHelper(context, DatabaseName
 
         val database = this.readableDatabase
 
-        val projection = arrayOf(ColumnId, ColumnCoinTypeId, ColumnAmount)
+        val projection = arrayOf(ColumnId, ColumnCoinType, ColumnAmount, ColumnAdditionalInformation)
 
         val sortOrder = "$ColumnId ASC"
 
@@ -101,15 +106,19 @@ internal class DbCoin(context: Context) : SQLiteOpenHelper(context, DatabaseName
         with(cursor) {
             while (moveToNext()) {
                 val id = getInt(getColumnIndexOrThrow(ColumnId))
-                val coinTypeId = getInt(getColumnIndexOrThrow(ColumnCoinTypeId))
                 val amount = getDouble(getColumnIndexOrThrow(ColumnAmount))
-                val coinType = CoinType.values()[coinTypeId]
 
-                list.add(Coin(id, coinType, amount))
+                val coinTypeString = getString(getColumnIndexOrThrow(ColumnCoinType))
+                val coinType = CoinTypes.values.byString(coinTypeString)
+                if (coinType == CoinTypes.Null) coinType.type = coinTypeString
+
+                val additionalInformation = getString(getColumnIndexOrThrow(ColumnAdditionalInformation))
+
+                list.add(Coin(id, coinType, amount, additionalInformation))
             }
         }
 
-        DbCoinActionPublishSubject.instance.publishSubject.onNext(DbAction.Get)
+        DbCoinActionPublishSubject.instance.publishSubject.onNext(DbPublishSubject(DbAction.Get, 1f))
         return list
     }
 
@@ -118,47 +127,40 @@ internal class DbCoin(context: Context) : SQLiteOpenHelper(context, DatabaseName
 
         val database = this.readableDatabase
 
-        val projection = arrayOf(ColumnId, ColumnCoinTypeId, ColumnAmount)
-
-        val selection = "$ColumnId = ?"
-        val selectionArgs = arrayOf(id.toString())
-
-        val sortOrder = "$ColumnId ASC"
+        val projection = arrayOf(ColumnId, ColumnCoinType, ColumnAmount, ColumnAdditionalInformation)
 
         val cursor = database.query(
-                DatabaseTable, projection, selection, selectionArgs,
-                null, null, sortOrder)
+                DatabaseTable, projection,
+                "$ColumnId = $id",
+                null, null, null,
+                "$ColumnId ASC")
 
         val list = mutableListOf<Coin>()
         with(cursor) {
             while (moveToNext()) {
-                val coinTypeId = getInt(getColumnIndexOrThrow(ColumnCoinTypeId))
                 val amount = getDouble(getColumnIndexOrThrow(ColumnAmount))
-                val coinType = CoinType.values()[coinTypeId]
+                val additionalInformation = getString(getColumnIndexOrThrow(ColumnAdditionalInformation))
 
-                list.add(Coin(id, coinType, amount))
+                val coinTypeString = getString(getColumnIndexOrThrow(ColumnCoinType))
+                val coinType = CoinTypes.values.byString(coinTypeString)
+                if (coinType == CoinTypes.Null) coinType.type = coinTypeString
+
+                list.add(Coin(id, coinType, amount, additionalInformation))
             }
         }
 
-        DbCoinActionPublishSubject.instance.publishSubject.onNext(DbAction.Get)
+        DbCoinActionPublishSubject.instance.publishSubject.onNext(DbPublishSubject(DbAction.Get, 1f))
         return list
     }
 
-    fun clear() {
-        Logger.instance.debug(tag, "clear")
-
-        for (value in get()) {
-            delete(value)
-        }
-    }
-
     companion object {
-        private const val DatabaseVersion = 1
+        private const val DatabaseVersion = 2
         private const val DatabaseName = "guepardoapps-mycoins-coin.db"
         private const val DatabaseTable = "coinTable"
 
         private const val ColumnId = "_id"
-        private const val ColumnCoinTypeId = "coinTypeId"
+        private const val ColumnCoinType = "coinType"
         private const val ColumnAmount = "amount"
+        private const val ColumnAdditionalInformation = "additionalInformation"
     }
 }

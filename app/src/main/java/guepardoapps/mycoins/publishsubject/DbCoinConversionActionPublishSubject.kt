@@ -1,6 +1,6 @@
 package guepardoapps.mycoins.publishsubject
 
-import guepardoapps.mycoins.enums.DbAction
+import guepardoapps.mycoins.models.DbPublishSubject
 import io.reactivex.subjects.PublishSubject
 
 internal class DbCoinConversionActionPublishSubject private constructor() {
@@ -13,5 +13,5 @@ internal class DbCoinConversionActionPublishSubject private constructor() {
         val instance: DbCoinConversionActionPublishSubject by lazy { Holder.instance }
     }
 
-    val publishSubject = PublishSubject.create<DbAction>()!!
+    val publishSubject = PublishSubject.create<DbPublishSubject>()!!
 }

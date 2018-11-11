@@ -1,6 +1,6 @@
 package guepardoapps.mycoins.converter
 
-import guepardoapps.mycoins.enums.CoinType
+import guepardoapps.mycoins.models.CoinType
 import guepardoapps.mycoins.enums.Currency
 import guepardoapps.mycoins.models.CoinTrend
 

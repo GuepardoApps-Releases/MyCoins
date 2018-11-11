@@ -2,23 +2,17 @@ apply plugin: "com.android.application"
 apply plugin: "kotlin-android"
 apply plugin: "kotlin-android-extensions"
 
-// junit5 doesn't support android projects out of the box
-apply plugin: "de.mannodermaus.android-junit5"
-
 android {
     compileSdkVersion 28
-    buildToolsVersion "28.0.2"
+    buildToolsVersion "28.0.3"
     defaultConfig {
         applicationId "guepardoapps.mycoins"
-        minSdkVersion 23
+        minSdkVersion 17
         targetSdkVersion 28
-        versionCode 10100
-        versionName "1.1.0.180902"
+        versionCode 20000
+        versionName "2.0.0.181111"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
-        testOptions {
-            unitTests.returnDefaultValues = true
-        }
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -29,8 +23,6 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
-    }
-    productFlavors {
     }
     aaptOptions {
         cruncherEnabled = false
@@ -47,6 +39,8 @@ repositories {
 
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.aar", "*.jar"])
+
+    implementation "com.github.TimeXt.TimeXt-Kotlin:timext-android:$timext_version"
 
     implementation "io.reactivex.rxjava2:rxkotlin:$reactivex_version"
 
@@ -82,25 +76,4 @@ dependencies {
 
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-
-    testImplementation "junit:junit:$junit_version"
-    androidTestImplementation "com.android.support.test:runner:$test_runner_version"
-    androidTestImplementation "com.android.support.test.espresso:espresso-core:$test_espresso_version"
-
-    // required if you want to use Mockito for unit tests
-    testImplementation "org.mockito:mockito-core:$mockito_version"
-    // required if you want to use Mockito for Android tests
-    androidTestImplementation "org.mockito:mockito-android:$mockito_version"
-
-    testImplementation("org.jetbrains.spek:spek-api:$spek_version") {
-        exclude group: "org.jetbrains.kotlin"
-    }
-    testImplementation("org.jetbrains.spek:spek-junit-platform-engine:$spek_version") {
-        exclude group: "org.junit.platform"
-        exclude group: "org.jetbrains.kotlin"
-    }
-    testImplementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
-    testImplementation "org.junit.platform:junit-platform-engine:$junit_platform_version"
-
-    testImplementation "org.junit.platform:junit-platform-runner:$junit_platform_runner_version"
 }

@@ -4,9 +4,12 @@ import android.content.ContentValues
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.content.Context
-import guepardoapps.mycoins.enums.CoinType
+import guepardoapps.mycoins.models.CoinType
 import guepardoapps.mycoins.enums.DbAction
+import guepardoapps.mycoins.extensions.byString
 import guepardoapps.mycoins.models.CoinConversion
+import guepardoapps.mycoins.models.CoinTypes
+import guepardoapps.mycoins.models.DbPublishSubject
 import guepardoapps.mycoins.publishsubject.DbCoinConversionActionPublishSubject
 import guepardoapps.mycoins.utils.Logger
 
@@ -22,12 +25,12 @@ internal class DbCoinConversion(context: Context) : SQLiteOpenHelper(context, Da
                 "CREATE TABLE IF NOT EXISTS $DatabaseTable"
                         + "("
                         + "$ColumnId INTEGER PRIMARY KEY autoincrement,"
-                        + "$ColumnCoinTypeId INTEGER,"
+                        + "$ColumnCoinType TEXT,"
                         + "$ColumnEurValue DOUBLE,"
                         + "$ColumnUsDollarValue DOUBLE"
                         + ")")
         database.execSQL(createTable)
-        DbCoinConversionActionPublishSubject.instance.publishSubject.onNext(DbAction.Null)
+        DbCoinConversionActionPublishSubject.instance.publishSubject.onNext(DbPublishSubject(DbAction.Null, 1f))
     }
 
     override fun onUpgrade(database: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
@@ -39,11 +42,11 @@ internal class DbCoinConversion(context: Context) : SQLiteOpenHelper(context, Da
         onUpgrade(database, oldVersion, newVersion)
     }
 
-    fun add(coinConversion: CoinConversion): Long {
+    fun add(coinConversion: CoinConversion, currentActionNo: Float = 1f, totalActions: Float = 1f): Long {
         Logger.instance.debug(tag, "add: $coinConversion")
 
         val values = ContentValues().apply {
-            put(ColumnCoinTypeId, coinConversion.coinType.id)
+            put(ColumnCoinType, coinConversion.coinType.type)
             put(ColumnEurValue, coinConversion.eurValue)
             put(ColumnUsDollarValue, coinConversion.usDollarValue)
         }
@@ -51,30 +54,11 @@ internal class DbCoinConversion(context: Context) : SQLiteOpenHelper(context, Da
         val database = this.writableDatabase
         val returnValue = database.insert(DatabaseTable, null, values)
 
-        DbCoinConversionActionPublishSubject.instance.publishSubject.onNext(DbAction.Add)
+        DbCoinConversionActionPublishSubject.instance.publishSubject.onNext(DbPublishSubject(DbAction.Add, currentActionNo / totalActions))
         return returnValue
     }
 
-    fun update(coinConversion: CoinConversion): Int {
-        Logger.instance.debug(tag, "update: $coinConversion")
-
-        val values = ContentValues().apply {
-            put(ColumnCoinTypeId, coinConversion.coinType.id)
-            put(ColumnEurValue, coinConversion.eurValue)
-            put(ColumnUsDollarValue, coinConversion.usDollarValue)
-        }
-
-        val selection = "$ColumnId LIKE ?"
-        val selectionArgs = arrayOf(coinConversion.id.toString())
-
-        val database = this.writableDatabase
-        val returnValue = database.update(DatabaseTable, values, selection, selectionArgs)
-
-        DbCoinConversionActionPublishSubject.instance.publishSubject.onNext(DbAction.Update)
-        return returnValue
-    }
-
-    fun delete(coinConversion: CoinConversion): Int {
+    fun delete(coinConversion: CoinConversion, currentActionNo: Float = 1f, totalActions: Float = 1f): Int {
         Logger.instance.debug(tag, "delete: $coinConversion")
 
         val database = this.writableDatabase
@@ -83,7 +67,7 @@ internal class DbCoinConversion(context: Context) : SQLiteOpenHelper(context, Da
         val selectionArgs = arrayOf(coinConversion.id.toString())
         val returnValue = database.delete(DatabaseTable, selection, selectionArgs)
 
-        DbCoinConversionActionPublishSubject.instance.publishSubject.onNext(DbAction.Delete)
+        DbCoinConversionActionPublishSubject.instance.publishSubject.onNext(DbPublishSubject(DbAction.Delete, currentActionNo / totalActions))
         return returnValue
     }
 
@@ -92,7 +76,7 @@ internal class DbCoinConversion(context: Context) : SQLiteOpenHelper(context, Da
 
         val database = this.readableDatabase
 
-        val projection = arrayOf(ColumnId, ColumnCoinTypeId, ColumnEurValue, ColumnUsDollarValue)
+        val projection = arrayOf(ColumnId, ColumnCoinType, ColumnEurValue, ColumnUsDollarValue)
 
         val sortOrder = "$ColumnId ASC"
 
@@ -104,10 +88,12 @@ internal class DbCoinConversion(context: Context) : SQLiteOpenHelper(context, Da
         with(cursor) {
             while (moveToNext()) {
                 val id = getInt(getColumnIndexOrThrow(ColumnId))
-                val coinTypeId = getInt(getColumnIndexOrThrow(ColumnCoinTypeId))
                 val eurValue = getDouble(getColumnIndexOrThrow(ColumnEurValue))
                 val usDollarValue = getDouble(getColumnIndexOrThrow(ColumnUsDollarValue))
-                val coinType = CoinType.values()[coinTypeId]
+
+                val coinTypeString = getString(getColumnIndexOrThrow(ColumnCoinType))
+                val coinType = CoinTypes.values.byString(coinTypeString)
+                if (coinType == CoinTypes.Null) coinType.type = coinTypeString
 
                 val coinConversion = CoinConversion()
                 coinConversion.id = id
@@ -119,7 +105,7 @@ internal class DbCoinConversion(context: Context) : SQLiteOpenHelper(context, Da
             }
         }
 
-        DbCoinConversionActionPublishSubject.instance.publishSubject.onNext(DbAction.Get)
+        DbCoinConversionActionPublishSubject.instance.publishSubject.onNext(DbPublishSubject(DbAction.Get, 1f))
         return list
     }
 
@@ -128,16 +114,13 @@ internal class DbCoinConversion(context: Context) : SQLiteOpenHelper(context, Da
 
         val database = this.readableDatabase
 
-        val projection = arrayOf(ColumnId, ColumnCoinTypeId, ColumnEurValue, ColumnUsDollarValue)
-
-        val selection = "$ColumnCoinTypeId = ?"
-        val selectionArgs = arrayOf(coinType.id.toString())
-
-        val sortOrder = "$ColumnId ASC"
+        val projection = arrayOf(ColumnId, ColumnCoinType, ColumnEurValue, ColumnUsDollarValue)
 
         val cursor = database.query(
-                DatabaseTable, projection, selection, selectionArgs,
-                null, null, sortOrder)
+                DatabaseTable, projection,
+                "$ColumnCoinType = '${coinType.type}'",
+                null, null, null,
+                "$ColumnId ASC")
 
         val list = mutableListOf<CoinConversion>()
         with(cursor) {
@@ -156,25 +139,26 @@ internal class DbCoinConversion(context: Context) : SQLiteOpenHelper(context, Da
             }
         }
 
-        DbCoinConversionActionPublishSubject.instance.publishSubject.onNext(DbAction.Get)
+        DbCoinConversionActionPublishSubject.instance.publishSubject.onNext(DbPublishSubject(DbAction.Get, 1f))
         return list
     }
 
-    fun clear() {
+    fun clear(coinType: CoinType) {
         Logger.instance.debug(tag, "clear")
 
-        for (value in get()) {
-            delete(value)
+        val coinTrendList = findByCoinType(coinType)
+        for ((index, value) in coinTrendList.withIndex()) {
+            delete(value, index.toFloat(), coinTrendList.size.toFloat())
         }
     }
 
     companion object {
-        private const val DatabaseVersion = 1
+        private const val DatabaseVersion = 2
         private const val DatabaseName = "guepardoapps-mycoins-coin-conversion.db"
         private const val DatabaseTable = "coinTable"
 
         private const val ColumnId = "_id"
-        private const val ColumnCoinTypeId = "coinTypeId"
+        private const val ColumnCoinType = "coinType"
         private const val ColumnEurValue = "eurValue"
         private const val ColumnUsDollarValue = "usDollarValue"
     }

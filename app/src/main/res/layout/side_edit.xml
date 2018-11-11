@@ -56,6 +56,27 @@
                     android:hint="@string/prompt_coin_amount"
                     android:inputType="numberDecimal"
                     android:maxLines="1"
+                    android:nextFocusDown="@+id/coin_additionalInformation_edit_textview"
+                    android:nextFocusRight="@+id/coin_additionalInformation_edit_textview"
+                    android:textColor="@color/TextIcon" />
+
+            </android.support.design.widget.TextInputLayout>
+
+            <android.support.design.widget.TextInputLayout
+                android:id="@+id/coin_AdditionalInformationInputLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentStart="true"
+                android:layout_below="@+id/coin_AmountInputLayout">
+
+                <EditText
+                    android:id="@+id/coin_additionalInformation_edit_textview"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/prompt_coin_additionalInformation"
+                    android:inputType="text"
+                    android:maxLines="1"
                     android:nextFocusDown="@+id/save_coin_edit_button"
                     android:nextFocusRight="@+id/save_coin_edit_button"
                     android:textColor="@color/TextIcon" />

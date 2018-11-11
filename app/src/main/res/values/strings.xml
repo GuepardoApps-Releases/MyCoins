@@ -25,6 +25,8 @@
 
     <string name="prompt_coin_type">Coin type</string>
     <string name="prompt_coin_amount">Coin amount</string>
+    <string name="prompt_coin_additionalInformation">Additional information</string>
+    <string name="prompt_currency_preferred">Preferred Currency (EUR/USD)</string>
 
     <string name="error_field_invalid_date">This date is not valid</string>
     <string name="error_nothing_changed">Nothing changed</string>
@@ -34,13 +36,11 @@
     <string name="author_title">Author</string>
     <string name="author">Jonas Schubert\nGuepardoApps</string>
     <string name="version_title">Version</string>
-    <string name="version">1.1.0.180902</string>
+    <string name="version">2.0.0.181111</string>
     <string name="email_title">EMail</string>
     <string name="email">guepardoapps@gmail.com</string>
     <string name="gitHubLink_title">GitHub</string>
     <string name="gitHubLink">https://github.com/GuepardoApps/MyCoins/</string>
     <string name="homepageLink_title">Homepage</string>
     <string name="homepageLink">https://guepardoapps.github.io/</string>
-    <string name="payPalLink_title">PayPal</string>
-    <string name="payPalLink">https://www.paypal.me/GuepardoApps/</string>
 </resources>

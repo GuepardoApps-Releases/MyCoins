@@ -1,7 +1,8 @@
 package guepardoapps.mycoins.extensions
 
-import guepardoapps.mycoins.enums.CoinType
+import guepardoapps.mycoins.models.CoinType
 import guepardoapps.mycoins.enums.Currency
+import guepardoapps.mycoins.models.CoinTypes
 
 internal fun Array<CoinType>.byString(string: String): CoinType {
     for (value in this) {
@@ -9,7 +10,7 @@ internal fun Array<CoinType>.byString(string: String): CoinType {
             return value
         }
     }
-    return CoinType.Null
+    return CoinTypes.Null
 }
 
 internal fun Array<CoinType>.combinedString(): String {
@@ -17,7 +18,7 @@ internal fun Array<CoinType>.combinedString(): String {
     this.forEach { coinType ->
         combinedString += coinType.type + ","
     }
-    return combinedString.substring(1, combinedString.length - 1)
+    return combinedString.substring(0, combinedString.length - 1)
 }
 
 internal fun Array<Currency>.combinedString(): String {
@@ -25,5 +26,5 @@ internal fun Array<Currency>.combinedString(): String {
     this.forEach { coinType ->
         combinedString += coinType.text + ","
     }
-    return combinedString.substring(1, combinedString.length - 1)
+    return combinedString.substring(0, combinedString.length - 1)
 }

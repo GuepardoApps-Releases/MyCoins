@@ -1,7 +1,7 @@
 package guepardoapps.mycoins.services.coin
 
 import android.content.Context
-import guepardoapps.mycoins.enums.CoinType
+import guepardoapps.mycoins.models.CoinType
 import guepardoapps.mycoins.models.Coin
 import guepardoapps.mycoins.models.CoinConversion
 import guepardoapps.mycoins.models.CoinTrend
@@ -16,8 +16,8 @@ internal interface ICoinService {
     fun deleteCoin(coin: Coin)
 
     fun getCoinConversion(coinType: CoinType): CoinConversion?
-    fun getCoinTrend(coinType: CoinType): CoinTrend?
+    fun getCoinTrend(coinType: CoinType): MutableList<CoinTrend>
 
-    fun loadCoinConversion()
+    fun loadCoinConversion(coinType: CoinType)
     fun loadCoinTrend(coinType: CoinType)
 }

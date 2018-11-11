@@ -1,6 +1,6 @@
 package guepardoapps.mycoins.services.api
 
-import guepardoapps.mycoins.enums.CoinType
+import guepardoapps.mycoins.models.CoinType
 import guepardoapps.mycoins.enums.DownloadResult
 import guepardoapps.mycoins.enums.DownloadType
 import guepardoapps.mycoins.tasks.ApiRestCallTask

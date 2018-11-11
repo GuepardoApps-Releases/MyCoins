@@ -9,7 +9,7 @@ import guepardoapps.mycoins.converter.JsonDataToCoinTrendConverter
 import guepardoapps.mycoins.database.coin.DbCoin
 import guepardoapps.mycoins.database.coin.DbCoinConversion
 import guepardoapps.mycoins.database.coin.DbCoinTrend
-import guepardoapps.mycoins.enums.CoinType
+import guepardoapps.mycoins.models.CoinType
 import guepardoapps.mycoins.enums.Currency
 import guepardoapps.mycoins.enums.DownloadType
 import guepardoapps.mycoins.models.Coin
@@ -17,7 +17,9 @@ import guepardoapps.mycoins.models.CoinConversion
 import guepardoapps.mycoins.models.CoinTrend
 import guepardoapps.mycoins.services.api.ApiService
 import guepardoapps.mycoins.services.api.OnApiServiceListener
+import guepardoapps.mycoins.tasks.DbSaveTask
 import guepardoapps.mycoins.utils.Logger
+import io.reactivex.subjects.PublishSubject
 
 @SuppressLint("StaticFieldLeak")
 internal class CoinService private constructor() : ICoinService {
@@ -28,6 +30,11 @@ internal class CoinService private constructor() : ICoinService {
     private var jsonDataToCoinConversionConverter = JsonDataToCoinConversionConverter()
     private var jsonDataToCoinTrendConverter = JsonDataToCoinTrendConverter()
     private var apiService = ApiService()
+
+    var isInitialized: Boolean = false
+    val initialSetupPublishSubject = PublishSubject.create<Boolean>()!!
+    private var initialLoadCoinConversions: MutableMap<String, Boolean> = hashMapOf()
+    private var initialLoadCoinTrends: MutableMap<String, Boolean> = hashMapOf()
 
     private object Holder {
         val instance: CoinService = CoinService()
@@ -52,9 +59,15 @@ internal class CoinService private constructor() : ICoinService {
 
                 when (downloadType) {
                     DownloadType.Conversion -> {
-                        handleDownloadConversion(jsonString, success)
+                        initialLoadCoinConversions[coinType.type] = true
+                        isInitialized = initialLoadCoinConversions.all { pair -> pair.value } && initialLoadCoinTrends.all { pair -> pair.value }
+                        initialSetupPublishSubject.onNext(isInitialized)
+                        handleDownloadConversion(jsonString, success, coinType)
                     }
                     DownloadType.Trend -> {
+                        initialLoadCoinTrends[coinType.type] = true
+                        isInitialized = initialLoadCoinConversions.all { pair -> pair.value } && initialLoadCoinTrends.all { pair -> pair.value }
+                        initialSetupPublishSubject.onNext(isInitialized)
                         handleDownloadTrend(jsonString, success, coinType)
                     }
                     DownloadType.Null -> {
@@ -64,9 +77,19 @@ internal class CoinService private constructor() : ICoinService {
             }
         })
 
-        loadCoinConversion()
-        for (coin in getCoinList()) {
-            loadCoinTrend(coin.coinType)
+        val coinList = getCoinList()
+        if (coinList.isEmpty()) {
+            isInitialized = true
+            initialSetupPublishSubject.onNext(isInitialized)
+        } else {
+            coinList.forEach { coin ->
+                initialLoadCoinConversions.plusAssign(coin.coinType.type to false)
+                initialLoadCoinTrends.plusAssign(coin.coinType.type to false)
+            }
+            coinList.forEach { coin ->
+                loadCoinConversion(coin.coinType)
+                loadCoinTrend(coin.coinType)
+            }
         }
     }
 
@@ -112,6 +135,7 @@ internal class CoinService private constructor() : ICoinService {
         dbCoin.add(coin)
         dbCoin.close()
 
+        loadCoinConversion(coin.coinType)
         loadCoinTrend(coin.coinType)
     }
 
@@ -127,6 +151,7 @@ internal class CoinService private constructor() : ICoinService {
         dbCoin.update(coin)
         dbCoin.close()
 
+        loadCoinConversion(coin.coinType)
         loadCoinTrend(coin.coinType)
     }
 
@@ -143,21 +168,22 @@ internal class CoinService private constructor() : ICoinService {
         dbCoin.close()
 
         val dbCoinTrend = DbCoinTrend(context!!)
-        val trendList = dbCoinTrend.findByCoinType(coin.coinType)
-        for (value in trendList) {
-            dbCoinTrend.delete(value)
-        }
+        dbCoinTrend.clear(coin.coinType)
         dbCoinTrend.close()
+
+        val dbCoinConversion = DbCoinConversion(context!!)
+        dbCoinConversion.clear(coin.coinType)
+        dbCoinConversion.close()
     }
 
-    override fun loadCoinConversion() {
+    override fun loadCoinConversion(coinType: CoinType) {
         if (this.context == null) {
             Logger.instance.warning(tag, "not initialized!")
             return
         }
 
         Logger.instance.verbose(tag, "loadCoinConversion")
-        apiService.load(DownloadType.Conversion, CoinType.Null, Constants.apiCoinConversion())
+        apiService.load(DownloadType.Conversion, coinType, Constants.apiCoinConversion(arrayOf(coinType)))
     }
 
     override fun getCoinConversion(coinType: CoinType): CoinConversion? {
@@ -185,22 +211,23 @@ internal class CoinService private constructor() : ICoinService {
 
         Logger.instance.verbose(tag, "loadCoinTrend for $coinType")
 
-        val currencyId = SharedPreferenceController(context!!).load(Constants.currency, Constants.currencyDefault) as Int
+        val currencyString = SharedPreferenceController(context!!).load(Constants.currency, Constants.currencyDefault)
+        val currencyId = Currency.values().first { x -> x.text == currencyString }.id
         val currency = Currency.values()[currencyId]
 
         apiService.load(DownloadType.Trend, coinType, Constants.apiCoinTrend(coinType, currency, 100))
     }
 
-    override fun getCoinTrend(coinType: CoinType): CoinTrend? {
+    override fun getCoinTrend(coinType: CoinType): MutableList<CoinTrend> {
         if (this.context == null) {
             Logger.instance.warning(tag, "not initialized!")
-            return null
+            return mutableListOf()
         }
 
         Logger.instance.verbose(tag, "getCoinTrend for $coinType")
 
         val dbCoinTrend = DbCoinTrend(context!!)
-        val coinTrend = dbCoinTrend.findByCoinType(coinType).firstOrNull()
+        val coinTrend = dbCoinTrend.findByCoinType(coinType)
         dbCoinTrend.close()
 
         Logger.instance.verbose(tag, "coinTrend $coinTrend")
@@ -208,7 +235,7 @@ internal class CoinService private constructor() : ICoinService {
         return coinTrend
     }
 
-    private fun handleDownloadConversion(jsonString: String, success: Boolean) {
+    private fun handleDownloadConversion(jsonString: String, success: Boolean, coinType: CoinType) {
         if (!success || jsonString.isEmpty()) {
             Logger.instance.error(tag, "handleDownloadConversion failed")
             return
@@ -216,19 +243,18 @@ internal class CoinService private constructor() : ICoinService {
 
         Logger.instance.verbose(tag, "handleDownloadConversion with $jsonString has success $success")
 
-        val dbCoin = DbCoin(context!!)
-        val coinList = dbCoin.get()
-        dbCoin.close()
-
-        val dbCoinConversion = DbCoinConversion(context!!)
-        val updatedList = jsonDataToCoinConversionConverter.convertResponseToList(jsonString, coinList)
-        dbCoinConversion.clear()
-        if (updatedList.isNotEmpty()) {
-            for (updatedValue in updatedList) {
-                dbCoinConversion.add(updatedValue)
+        val coinConversion = jsonDataToCoinConversionConverter.convertResponse(jsonString, coinType)
+        if (coinConversion != null) {
+            val task = DbSaveTask()
+            task.method = {
+                val dbCoinConversion = DbCoinConversion(context!!)
+                dbCoinConversion.clear(coinType)
+                dbCoinConversion.add(coinConversion)
+                dbCoinConversion.close()
             }
+            task.execute()
+            return
         }
-        dbCoinConversion.close()
     }
 
     private fun handleDownloadTrend(jsonString: String, success: Boolean, coinType: CoinType) {
@@ -239,17 +265,23 @@ internal class CoinService private constructor() : ICoinService {
 
         Logger.instance.verbose(tag, "handleDownloadTrend with $jsonString has success $success for coinType $coinType")
 
-        val currencyId = SharedPreferenceController(context!!).load(Constants.currency, Constants.currencyDefault) as Int
+        val currencyString = SharedPreferenceController(context!!).load(Constants.currency, Constants.currencyDefault)
+        val currencyId = Currency.values().first { x -> x.text == currencyString }.id
         val currency = Currency.values()[currencyId]
 
-        val dbCoinTrend = DbCoinTrend(context!!)
         val updatedList = jsonDataToCoinTrendConverter.convertResponseToList(jsonString, coinType, currency)
-        dbCoinTrend.clear()
         if (updatedList.isNotEmpty()) {
-            for (updatedValue in updatedList) {
-                dbCoinTrend.add(updatedValue)
+            val task = DbSaveTask()
+            task.method = {
+                val dbCoinTrend = DbCoinTrend(context!!)
+                dbCoinTrend.clear(coinType)
+                for ((index, updatedValue) in updatedList.withIndex()) {
+                    dbCoinTrend.add(updatedValue, index.toFloat(), updatedList.size.toFloat())
+                }
+                dbCoinTrend.close()
             }
+            task.execute()
+            return
         }
-        dbCoinTrend.close()
     }
 }
