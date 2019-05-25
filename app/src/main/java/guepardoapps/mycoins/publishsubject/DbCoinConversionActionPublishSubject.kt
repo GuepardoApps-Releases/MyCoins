@@ -13,5 +13,5 @@ internal class DbCoinConversionActionPublishSubject private constructor() {
         val instance: DbCoinConversionActionPublishSubject by lazy { Holder.instance }
     }
 
-    val publishSubject = PublishSubject.create<DbPublishSubject>()!!
+    val publishSubject = PublishSubject.create<DbPublishSubject>()
 }

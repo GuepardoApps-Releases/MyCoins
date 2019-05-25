@@ -76,7 +76,5 @@ class ActivityAbout : MaterialAboutActivity() {
                 .build()
     }
 
-    override fun getActivityTitle(): CharSequence? {
-        return getString(R.string.about)
-    }
+    override fun getActivityTitle(): CharSequence? = getString(R.string.about)
 }

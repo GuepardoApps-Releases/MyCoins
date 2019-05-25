@@ -3,7 +3,6 @@ package guepardoapps.mycoins.tasks
 import android.os.AsyncTask
 
 internal class DbSaveTask : AsyncTask<String, Void, String>() {
-    // private val tag: String = ApiRestCallTask::class.java.simpleName
 
     lateinit var method: () -> Unit
 
@@ -12,6 +11,5 @@ internal class DbSaveTask : AsyncTask<String, Void, String>() {
         return "OK"
     }
 
-    override fun onPostExecute(result: String?) {
-    }
+    override fun onPostExecute(result: String?) {}
 }

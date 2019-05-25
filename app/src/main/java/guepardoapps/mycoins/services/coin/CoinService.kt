@@ -32,7 +32,7 @@ internal class CoinService private constructor() : ICoinService {
     private var apiService = ApiService()
 
     var isInitialized: Boolean = false
-    val initialSetupPublishSubject = PublishSubject.create<Boolean>()!!
+    val initialSetupPublishSubject = PublishSubject.create<Boolean>()
     private var initialLoadCoinConversions: MutableMap<String, Boolean> = hashMapOf()
     private var initialLoadCoinTrends: MutableMap<String, Boolean> = hashMapOf()
 
@@ -45,12 +45,11 @@ internal class CoinService private constructor() : ICoinService {
     }
 
     override fun initialize(context: Context) {
+        Logger.instance.verbose(tag, "initialize")
+
         if (this.context != null) {
             return
         }
-
-        Logger.instance.verbose(tag, "initialize")
-
         this.context = context
 
         apiService.setOnApiServiceListener(object : OnApiServiceListener {

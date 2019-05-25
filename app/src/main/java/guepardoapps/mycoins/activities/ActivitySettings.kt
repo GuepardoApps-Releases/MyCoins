@@ -2,13 +2,10 @@ package guepardoapps.mycoins.activities
 
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.graphics.Color
 import android.os.Bundle
 import android.text.Editable
-import android.text.SpannableStringBuilder
 import android.text.TextUtils
 import android.text.TextWatcher
-import android.text.style.ForegroundColorSpan
 import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.Button
@@ -16,12 +13,13 @@ import guepardoapps.mycoins.R
 import guepardoapps.mycoins.common.Constants
 import guepardoapps.mycoins.controller.SharedPreferenceController
 import guepardoapps.mycoins.enums.Currency
+import guepardoapps.mycoins.extensions.createErrorText
 import kotlinx.android.synthetic.main.side_settings.*
 
 @SuppressLint("SetTextI18n")
 class ActivitySettings : Activity() {
 
-    private lateinit var sharedPreferenceController: SharedPreferenceController
+    private var sharedPreferenceController: SharedPreferenceController = SharedPreferenceController(this)
 
     private lateinit var saveButton: Button
 
@@ -30,8 +28,6 @@ class ActivitySettings : Activity() {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.side_settings)
-
-        sharedPreferenceController = SharedPreferenceController(this)
 
         saveButton = findViewById(R.id.save_settings_edit_button)
         saveButton.isEnabled = false
@@ -43,11 +39,8 @@ class ActivitySettings : Activity() {
                 saveButton.isEnabled = savedCurrency != editable.toString()
             }
 
-            override fun beforeTextChanged(charSequence: CharSequence?, start: Int, count: Int, after: Int) {
-            }
-
-            override fun onTextChanged(charSequence: CharSequence?, start: Int, count: Int, after: Int) {
-            }
+            override fun beforeTextChanged(charSequence: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(charSequence: CharSequence?, start: Int, count: Int, after: Int) {}
         }
 
         settings_currency_edit_textview.setAdapter(ArrayAdapter<String>(this, android.R.layout.simple_dropdown_item_1line, Currency.values().map { x -> x.text }))
@@ -74,11 +67,5 @@ class ActivitySettings : Activity() {
                 finish()
             }
         }
-    }
-
-    private fun createErrorText(errorString: String): SpannableStringBuilder {
-        val spannableStringBuilder = SpannableStringBuilder(errorString)
-        spannableStringBuilder.setSpan(ForegroundColorSpan(Color.RED), 0, errorString.length, 0)
-        return spannableStringBuilder
     }
 }

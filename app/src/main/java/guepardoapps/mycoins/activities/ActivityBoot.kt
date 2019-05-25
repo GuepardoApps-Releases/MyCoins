@@ -43,7 +43,7 @@ class ActivityBoot : Activity() {
                             { }
                     )
         } else {
-            Handler().postDelayed({ NavigationController(this).navigate(ActivityMain::class.java, true) }, 1.seconds)
+            Handler().postDelayed({ NavigationController(this).navigate(ActivityMain::class.java, true) }, 1.5.seconds)
         }
     }
 

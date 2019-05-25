@@ -38,9 +38,7 @@ internal class DbCoinConversion(context: Context) : SQLiteOpenHelper(context, Da
         onCreate(database)
     }
 
-    override fun onDowngrade(database: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        onUpgrade(database, oldVersion, newVersion)
-    }
+    override fun onDowngrade(database: SQLiteDatabase, oldVersion: Int, newVersion: Int) = onUpgrade(database, oldVersion, newVersion)
 
     fun add(coinConversion: CoinConversion, currentActionNo: Float = 1f, totalActions: Float = 1f): Long {
         Logger.instance.debug(tag, "add: $coinConversion")
@@ -51,9 +49,7 @@ internal class DbCoinConversion(context: Context) : SQLiteOpenHelper(context, Da
             put(ColumnUsDollarValue, coinConversion.usDollarValue)
         }
 
-        val database = this.writableDatabase
-        val returnValue = database.insert(DatabaseTable, null, values)
-
+        val returnValue = this.writableDatabase.insert(DatabaseTable, null, values)
         DbCoinConversionActionPublishSubject.instance.publishSubject.onNext(DbPublishSubject(DbAction.Add, currentActionNo / totalActions))
         return returnValue
     }
@@ -61,12 +57,7 @@ internal class DbCoinConversion(context: Context) : SQLiteOpenHelper(context, Da
     fun delete(coinConversion: CoinConversion, currentActionNo: Float = 1f, totalActions: Float = 1f): Int {
         Logger.instance.debug(tag, "delete: $coinConversion")
 
-        val database = this.writableDatabase
-
-        val selection = "$ColumnId LIKE ?"
-        val selectionArgs = arrayOf(coinConversion.id.toString())
-        val returnValue = database.delete(DatabaseTable, selection, selectionArgs)
-
+        val returnValue = this.writableDatabase.delete(DatabaseTable, "$ColumnId LIKE ?", arrayOf(coinConversion.id.toString()))
         DbCoinConversionActionPublishSubject.instance.publishSubject.onNext(DbPublishSubject(DbAction.Delete, currentActionNo / totalActions))
         return returnValue
     }
@@ -74,15 +65,9 @@ internal class DbCoinConversion(context: Context) : SQLiteOpenHelper(context, Da
     fun get(): MutableList<CoinConversion> {
         Logger.instance.debug(tag, "get")
 
-        val database = this.readableDatabase
-
-        val projection = arrayOf(ColumnId, ColumnCoinType, ColumnEurValue, ColumnUsDollarValue)
-
-        val sortOrder = "$ColumnId ASC"
-
-        val cursor = database.query(
-                DatabaseTable, projection, null, null,
-                null, null, sortOrder)
+        val cursor = this.readableDatabase.query(DatabaseTable,
+                arrayOf(ColumnId, ColumnCoinType, ColumnEurValue, ColumnUsDollarValue),
+                null, null, null, null, "$ColumnId ASC")
 
         val list = mutableListOf<CoinConversion>()
         with(cursor) {
@@ -112,15 +97,9 @@ internal class DbCoinConversion(context: Context) : SQLiteOpenHelper(context, Da
     fun findByCoinType(coinType: CoinType): MutableList<CoinConversion> {
         Logger.instance.debug(tag, "findByCoinType: $coinType")
 
-        val database = this.readableDatabase
-
-        val projection = arrayOf(ColumnId, ColumnCoinType, ColumnEurValue, ColumnUsDollarValue)
-
-        val cursor = database.query(
-                DatabaseTable, projection,
-                "$ColumnCoinType = '${coinType.type}'",
-                null, null, null,
-                "$ColumnId ASC")
+        val cursor = this.readableDatabase.query(DatabaseTable,
+                arrayOf(ColumnId, ColumnCoinType, ColumnEurValue, ColumnUsDollarValue),
+                "$ColumnCoinType = '${coinType.type}'", null, null, null, "$ColumnId ASC")
 
         val list = mutableListOf<CoinConversion>()
         with(cursor) {

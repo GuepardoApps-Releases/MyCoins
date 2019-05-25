@@ -15,7 +15,5 @@ internal class CoinConversion {
     @JsonKey("", "USD")
     var usDollarValue: Double = 0.0
 
-    override fun toString(): String {
-        return "{Class: $tag, Id: $id, CoinType: $coinType, EurValue: $eurValue, UsDollarValue: $usDollarValue}"
-    }
+    override fun toString(): String = "{Class: $tag, Id: $id, CoinType: $coinType, EurValue: $eurValue, UsDollarValue: $usDollarValue}"
 }

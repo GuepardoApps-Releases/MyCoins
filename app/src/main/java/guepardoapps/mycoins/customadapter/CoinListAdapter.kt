@@ -50,17 +50,11 @@ internal class CoinListAdapter(private val context: Context, coinList: MutableLi
         notifyDataSetChanged()
     }
 
-    override fun getItem(position: Int): Any {
-        return coinAdapterList[position]
-    }
+    override fun getItem(position: Int): CoinAdapterHolder = coinAdapterList[position]
 
-    override fun getItemId(position: Int): Long {
-        return coinAdapterList[position].coin.id.toLong()
-    }
+    override fun getItemId(position: Int): Long = coinAdapterList[position].coin.id.toLong()
 
-    override fun getCount(): Int {
-        return coinAdapterList.size
-    }
+    override fun getCount(): Int = coinAdapterList.size
 
     @SuppressLint("SetTextI18n", "ViewHolder", "InflateParams")
     override fun getView(index: Int, convertView: View?, parentView: ViewGroup?): View {
@@ -108,10 +102,10 @@ internal class CoinListAdapter(private val context: Context, coinList: MutableLi
 
         holder.delete.setOnClickListener {
             MaterialDialog(context).show {
-                title(text = "Delete")
-                message(text = "Delete ${holder.coin.coinType.type}?")
-                positiveButton(text = "Yes") { CoinService.instance.deleteCoin(holder.coin) }
-                negativeButton(text = "No")
+                title(text = context.getString(R.string.delete))
+                message(text = "${context.getString(R.string.delete)} ${holder.coin.coinType.type}?")
+                positiveButton(text = context.getString(R.string.yes)) { CoinService.instance.deleteCoin(holder.coin) }
+                negativeButton(text = context.getString(R.string.no))
             }
         }
 

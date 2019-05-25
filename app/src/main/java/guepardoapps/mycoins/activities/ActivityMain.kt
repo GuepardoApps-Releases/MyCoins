@@ -102,13 +102,9 @@ class ActivityMain : Activity(), BottomNavigation.OnMenuItemSelectionListener {
         subscriptions.clear()
     }
 
-    override fun onMenuItemSelect(itemId: Int, position: Int, fromUser: Boolean) {
-        performMenuAction(itemId)
-    }
+    override fun onMenuItemSelect(itemId: Int, position: Int, fromUser: Boolean) = performMenuAction(itemId)
 
-    override fun onMenuItemReselect(itemId: Int, position: Int, fromUser: Boolean) {
-        performMenuAction(itemId)
-    }
+    override fun onMenuItemReselect(itemId: Int, position: Int, fromUser: Boolean) = performMenuAction(itemId)
 
     private fun handleDbPublishSubject(dbPublishSubject: DbPublishSubject) {
         when (dbPublishSubject.dbAction) {

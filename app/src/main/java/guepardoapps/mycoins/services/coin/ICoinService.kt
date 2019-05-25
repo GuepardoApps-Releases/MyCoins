@@ -10,14 +10,20 @@ internal interface ICoinService {
     fun initialize(context: Context)
 
     fun getCoinList(): MutableList<Coin>
+
     fun getCoinById(id: Int): Coin?
+
     fun addCoin(coin: Coin)
+
     fun updateCoin(coin: Coin)
+
     fun deleteCoin(coin: Coin)
 
     fun getCoinConversion(coinType: CoinType): CoinConversion?
+
     fun getCoinTrend(coinType: CoinType): MutableList<CoinTrend>
 
     fun loadCoinConversion(coinType: CoinType)
+
     fun loadCoinTrend(coinType: CoinType)
 }

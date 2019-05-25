@@ -13,42 +13,41 @@ internal class JsonDataToCoinTrendConverter : IJsonDataToCoinTrendConverter {
 
     private val responseJsonKey = "Response"
     private val responseSuccessJsonKey = "Success"
-    // private val typeJsonKey = "Type"
-    // private val aggregatedJsonKey = "Aggregated"
 
-    override fun convertResponseToList(jsonString: String, coinType: CoinType, currency: Currency): MutableList<CoinTrend> {
-        val list = mutableListOf<CoinTrend>()
-        Logger.instance.verbose(tag, jsonString)
+    override fun convertResponseToList(jsonString: String, coinType: CoinType, currency: Currency): MutableList<CoinTrend> =
 
-        try {
-            val jsonObject = JSONObject(jsonString)
-            if (jsonObject.getString(responseJsonKey) != responseSuccessJsonKey) {
-                Logger.instance.error(tag, "Error in parsing jsonObject in convertResponseToList: $jsonObject")
-                return mutableListOf()
+            try {
+                val list = mutableListOf<CoinTrend>()
+                Logger.instance.verbose(tag, jsonString)
+
+                val jsonObject = JSONObject(jsonString)
+                if (jsonObject.getString(responseJsonKey) == responseSuccessJsonKey) {
+                    val coinCurrencyC = CoinTrend()
+                    val dataListJsonArray = jsonObject.getJSONArray(coinCurrencyC.getJsonKey().key)
+
+                    for (index in 0 until dataListJsonArray.length() step 1) {
+                        val dataJsonObject = dataListJsonArray.getJSONObject(index)
+
+                        val newCoinCurrency = CoinTrend()
+                        newCoinCurrency.id = index
+                        newCoinCurrency.time = dataJsonObject.getLong(newCoinCurrency.getPropertyJsonKey(newCoinCurrency::time.name).key)
+                        newCoinCurrency.openValue = dataJsonObject.getDouble(newCoinCurrency.getPropertyJsonKey(newCoinCurrency::openValue.name).key)
+                        newCoinCurrency.closeValue = dataJsonObject.getDouble(newCoinCurrency.getPropertyJsonKey(newCoinCurrency::closeValue.name).key)
+                        newCoinCurrency.lowValue = dataJsonObject.getDouble(newCoinCurrency.getPropertyJsonKey(newCoinCurrency::lowValue.name).key)
+                        newCoinCurrency.highValue = dataJsonObject.getDouble(newCoinCurrency.getPropertyJsonKey(newCoinCurrency::highValue.name).key)
+                        newCoinCurrency.coinType = coinType
+                        newCoinCurrency.currency = currency
+
+                        list.add(newCoinCurrency)
+                    }
+                } else {
+                    Logger.instance.error(tag, "Error in parsing jsonObject in convertResponseToList: $jsonObject")
+                }
+
+                list
+            } catch (exception: Exception) {
+                Logger.instance.error(tag, exception)
+                mutableListOf()
             }
 
-            val coinCurrencyC = CoinTrend()
-            val dataListJsonArray = jsonObject.getJSONArray(coinCurrencyC.getJsonKey().key)
-
-            for (index in 0 until dataListJsonArray.length() step 1) {
-                val dataJsonObject = dataListJsonArray.getJSONObject(index)
-
-                val newCoinCurrency = CoinTrend()
-                newCoinCurrency.id = index
-                newCoinCurrency.time = dataJsonObject.getLong(newCoinCurrency.getPropertyJsonKey(newCoinCurrency::time.name).key)
-                newCoinCurrency.openValue = dataJsonObject.getDouble(newCoinCurrency.getPropertyJsonKey(newCoinCurrency::openValue.name).key)
-                newCoinCurrency.closeValue = dataJsonObject.getDouble(newCoinCurrency.getPropertyJsonKey(newCoinCurrency::closeValue.name).key)
-                newCoinCurrency.lowValue = dataJsonObject.getDouble(newCoinCurrency.getPropertyJsonKey(newCoinCurrency::lowValue.name).key)
-                newCoinCurrency.highValue = dataJsonObject.getDouble(newCoinCurrency.getPropertyJsonKey(newCoinCurrency::highValue.name).key)
-                newCoinCurrency.coinType = coinType
-                newCoinCurrency.currency = currency
-
-                list.add(newCoinCurrency)
-            }
-        } catch (exception: Exception) {
-            Logger.instance.error(tag, exception)
-        }
-
-        return list
-    }
 }
