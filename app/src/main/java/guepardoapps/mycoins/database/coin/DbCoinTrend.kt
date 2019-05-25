@@ -43,9 +43,7 @@ internal class DbCoinTrend(context: Context) : SQLiteOpenHelper(context, Databas
         onCreate(database)
     }
 
-    override fun onDowngrade(database: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        onUpgrade(database, oldVersion, newVersion)
-    }
+    override fun onDowngrade(database: SQLiteDatabase, oldVersion: Int, newVersion: Int) = onUpgrade(database, oldVersion, newVersion)
 
     fun add(coinCurrency: CoinTrend, currentActionNo: Float = 1f, totalActions: Float = 1f): Long {
         Logger.instance.debug(tag, "add: $coinCurrency")
@@ -60,9 +58,7 @@ internal class DbCoinTrend(context: Context) : SQLiteOpenHelper(context, Databas
             put(ColumnCurrency, coinCurrency.currency.id)
         }
 
-        val database = this.writableDatabase
-        val returnValue = database.insert(DatabaseTable, null, values)
-
+        val returnValue = this.writableDatabase.insert(DatabaseTable, null, values)
         DbCoinTrendActionPublishSubject.instance.publishSubject.onNext(DbPublishSubject(DbAction.Add, currentActionNo / totalActions))
         return returnValue
     }
@@ -70,12 +66,7 @@ internal class DbCoinTrend(context: Context) : SQLiteOpenHelper(context, Databas
     fun delete(coinCurrency: CoinTrend, currentActionNo: Float = 1f, totalActions: Float = 1f): Int {
         Logger.instance.debug(tag, "delete: $coinCurrency")
 
-        val database = this.writableDatabase
-
-        val selection = "$ColumnId LIKE ?"
-        val selectionArgs = arrayOf(coinCurrency.id.toString())
-        val returnValue = database.delete(DatabaseTable, selection, selectionArgs)
-
+        val returnValue = this.writableDatabase.delete(DatabaseTable, "$ColumnId LIKE ?", arrayOf(coinCurrency.id.toString()))
         DbCoinTrendActionPublishSubject.instance.publishSubject.onNext(DbPublishSubject(DbAction.Delete, currentActionNo / totalActions))
         return returnValue
     }
@@ -83,23 +74,9 @@ internal class DbCoinTrend(context: Context) : SQLiteOpenHelper(context, Databas
     fun get(): MutableList<CoinTrend> {
         Logger.instance.debug(tag, "get")
 
-        val database = this.readableDatabase
-
-        val projection = arrayOf(
-                ColumnId,
-                ColumnCoinType,
-                ColumnTime,
-                ColumnOpenValue,
-                ColumnCloseValue,
-                ColumnLowValue,
-                ColumnHighValue,
-                ColumnCurrency)
-
-        val sortOrder = "$ColumnId ASC"
-
-        val cursor = database.query(
-                DatabaseTable, projection, null, null,
-                null, null, sortOrder)
+        val cursor = this.readableDatabase.query(DatabaseTable,
+                arrayOf(ColumnId, ColumnCoinType, ColumnTime, ColumnOpenValue, ColumnCloseValue, ColumnLowValue, ColumnHighValue, ColumnCurrency),
+                null, null, null, null, "$ColumnId ASC")
 
         val list = mutableListOf<CoinTrend>()
         with(cursor) {
@@ -139,23 +116,9 @@ internal class DbCoinTrend(context: Context) : SQLiteOpenHelper(context, Databas
     fun findByCoinType(coinType: CoinType): MutableList<CoinTrend> {
         Logger.instance.debug(tag, "findByCoinType: $coinType")
 
-        val database = this.readableDatabase
-
-        val projection = arrayOf(
-                ColumnId,
-                ColumnCoinType,
-                ColumnTime,
-                ColumnOpenValue,
-                ColumnCloseValue,
-                ColumnLowValue,
-                ColumnHighValue,
-                ColumnCurrency)
-
-        val cursor = database.query(
-                DatabaseTable, projection,
-                "$ColumnCoinType = '${coinType.type}'",
-                null, null, null,
-                "$ColumnId ASC")
+        val cursor = this.readableDatabase.query(DatabaseTable,
+                arrayOf(ColumnId, ColumnCoinType, ColumnTime, ColumnOpenValue, ColumnCloseValue, ColumnLowValue, ColumnHighValue, ColumnCurrency),
+                "$ColumnCoinType = '${coinType.type}'", null, null, null, "$ColumnId ASC")
 
         val list = mutableListOf<CoinTrend>()
         with(cursor) {

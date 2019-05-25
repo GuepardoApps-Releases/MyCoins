@@ -9,22 +9,21 @@ import org.json.JSONObject
 internal class JsonDataToCoinConversionConverter : IJsonDataToCoinConversionConverter {
     private val tag: String = JsonDataToCoinConversionConverter::class.java.simpleName
 
-    override fun convertResponse(jsonString: String, coinType: CoinType): CoinConversion? {
-        Logger.instance.verbose(tag, jsonString)
+    override fun convertResponse(jsonString: String, coinType: CoinType): CoinConversion? =
+            try {
+                Logger.instance.verbose(tag, jsonString)
 
-        return try {
-            val jsonObject = JSONObject(jsonString)
-            val coinJsonObject = jsonObject.getJSONObject(coinType.type)
+                val jsonObject = JSONObject(jsonString)
+                val coinJsonObject = jsonObject.getJSONObject(coinType.type)
 
-            val coinConversion = CoinConversion()
-            coinConversion.coinType = coinType
-            coinConversion.eurValue = coinJsonObject.getDouble(coinConversion.getPropertyJsonKey(coinConversion::eurValue.name).key)
-            coinConversion.usDollarValue = coinJsonObject.getDouble(coinConversion.getPropertyJsonKey(coinConversion::usDollarValue.name).key)
+                val coinConversion = CoinConversion()
+                coinConversion.coinType = coinType
+                coinConversion.eurValue = coinJsonObject.getDouble(coinConversion.getPropertyJsonKey(coinConversion::eurValue.name).key)
+                coinConversion.usDollarValue = coinJsonObject.getDouble(coinConversion.getPropertyJsonKey(coinConversion::usDollarValue.name).key)
 
-            coinConversion
-        } catch (exception: Exception) {
-            Logger.instance.error(tag, exception)
-            null
-        }
-    }
+                coinConversion
+            } catch (exception: Exception) {
+                Logger.instance.error(tag, exception)
+                null
+            }
 }

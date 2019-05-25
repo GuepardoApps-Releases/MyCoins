@@ -28,7 +28,5 @@ internal class CoinTrend {
     var coinType: CoinType = CoinTypes.Null
     var currency: Currency = Currency.EUR
 
-    override fun toString(): String {
-        return "{Class: $tag, Id: $id, Time: $time, OpenValue: $openValue, CloseValue: $closeValue, LowValue: $lowValue, HighValue: $highValue, CoinType: $coinType, Currency: $currency}"
-    }
+    override fun toString(): String = "{Class: $tag, Id: $id, Time: $time, OpenValue: $openValue, CloseValue: $closeValue, LowValue: $lowValue, HighValue: $highValue, CoinType: $coinType, Currency: $currency}"
 }

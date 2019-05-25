@@ -6,13 +6,9 @@ import guepardoapps.mycoins.models.CoinTrend
 import guepardoapps.mycoins.utils.Logger
 import kotlin.reflect.full.declaredMemberProperties
 
-internal fun CoinTrend.getJsonKey(): JsonKey {
-    return this::class.annotations.find { it is JsonKey } as JsonKey
-}
+internal fun CoinTrend.getJsonKey(): JsonKey = this::class.annotations.find { it is JsonKey } as JsonKey
 
-internal fun CoinTrend.getPropertyJsonKey(propertyName: String): JsonKey {
-    return this::class.declaredMemberProperties.find { it.name == propertyName }?.annotations?.find { it is JsonKey } as JsonKey
-}
+internal fun CoinTrend.getPropertyJsonKey(propertyName: String): JsonKey = this::class.declaredMemberProperties.find { it.name == propertyName }?.annotations?.find { it is JsonKey } as JsonKey
 
 internal fun MutableList<CoinTrend>.getTrend(): Trend {
     if (this.isEmpty()) {
