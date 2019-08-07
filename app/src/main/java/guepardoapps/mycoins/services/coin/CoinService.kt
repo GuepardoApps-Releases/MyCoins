@@ -25,16 +25,17 @@ import io.reactivex.subjects.PublishSubject
 internal class CoinService private constructor() : ICoinService {
     private val tag: String = CoinService::class.java.simpleName
 
-    private var context: Context? = null
-
-    private var jsonDataToCoinConversionConverter = JsonDataToCoinConversionConverter()
-    private var jsonDataToCoinTrendConverter = JsonDataToCoinTrendConverter()
     private var apiService = ApiService()
 
-    var isInitialized: Boolean = false
-    val initialSetupPublishSubject = PublishSubject.create<Boolean>()
+    private var context: Context? = null
+
     private var initialLoadCoinConversions: MutableMap<String, Boolean> = hashMapOf()
+
     private var initialLoadCoinTrends: MutableMap<String, Boolean> = hashMapOf()
+
+    val initialSetupPublishSubject = PublishSubject.create<Boolean>()
+
+    var isInitialized: Boolean = false
 
     private object Holder {
         val instance: CoinService = CoinService()
@@ -42,6 +43,107 @@ internal class CoinService private constructor() : ICoinService {
 
     companion object {
         val instance: CoinService by lazy { Holder.instance }
+    }
+
+    override fun addCoin(coin: Coin) {
+        if (this.context == null) {
+            Logger.instance.warning(tag, "not initialized!")
+            return
+        }
+
+        Logger.instance.verbose(tag, "addCoin $coin")
+
+        val dbCoin = DbCoin(context!!)
+        dbCoin.add(coin)
+        dbCoin.close()
+
+        loadCoinConversion(coin.coinType)
+        loadCoinTrend(coin.coinType)
+    }
+
+    override fun deleteCoin(coin: Coin) {
+        if (this.context == null) {
+            Logger.instance.warning(tag, "not initialized!")
+            return
+        }
+
+        Logger.instance.verbose(tag, "deleteCoin $coin")
+
+        val dbCoin = DbCoin(context!!)
+        dbCoin.delete(coin)
+        dbCoin.close()
+
+        val dbCoinTrend = DbCoinTrend(context!!)
+        dbCoinTrend.clear(coin.coinType)
+        dbCoinTrend.close()
+
+        val dbCoinConversion = DbCoinConversion(context!!)
+        dbCoinConversion.clear(coin.coinType)
+        dbCoinConversion.close()
+    }
+
+    override fun getCoinById(id: String): Coin? {
+        if (this.context == null) {
+            Logger.instance.warning(tag, "not initialized!")
+            return null
+        }
+
+        Logger.instance.verbose(tag, "getCoinById $id")
+
+        val dbCoin = DbCoin(context!!)
+        val coin = dbCoin.findById(id).firstOrNull()
+        dbCoin.close()
+
+        return coin
+    }
+
+    override fun getCoinConversion(coinType: CoinType): CoinConversion? {
+        if (this.context == null) {
+            Logger.instance.warning(tag, "not initialized!")
+            return null
+        }
+
+        Logger.instance.verbose(tag, "getCoinConversion for $coinType")
+
+        val dbCoinConversion = DbCoinConversion(context!!)
+        val coinConversion = dbCoinConversion.findByCoinType(coinType).firstOrNull()
+        dbCoinConversion.close()
+
+        Logger.instance.verbose(tag, "coinConversion $coinConversion")
+
+        return coinConversion
+    }
+
+    override fun getCoinList(): MutableList<Coin> {
+        if (this.context == null) {
+            Logger.instance.warning(tag, "not initialized!")
+            return mutableListOf()
+        }
+
+        Logger.instance.verbose(tag, "getCoinList")
+
+        val dbCoin = DbCoin(context!!)
+        val list = dbCoin.get()
+        dbCoin.close()
+
+        return list
+    }
+
+    override fun getCoinTrend(coinType: CoinType): MutableList<CoinTrend> {
+        if (this.context == null) {
+            Logger.instance.warning(tag, "not initialized!")
+            return mutableListOf()
+        }
+
+        Logger.instance.verbose(tag, "getCoinTrend for $coinType")
+
+        val dbCoinTrend = DbCoinTrend(context!!)
+        val coinTrend = dbCoinTrend.findByCoinType(coinType)
+        dbCoinTrend.close()
+
+        Logger.instance.verbose(tag, "coinTrend $coinTrend")
+
+        return coinTrend
     }
 
     override fun initialize(context: Context) {
@@ -92,50 +194,29 @@ internal class CoinService private constructor() : ICoinService {
         }
     }
 
-    override fun getCoinList(): MutableList<Coin> {
-        if (this.context == null) {
-            Logger.instance.warning(tag, "not initialized!")
-            return mutableListOf()
-        }
-
-        Logger.instance.verbose(tag, "getCoinList")
-
-        val dbCoin = DbCoin(context!!)
-        val list = dbCoin.get()
-        dbCoin.close()
-
-        return list
-    }
-
-    override fun getCoinById(id: Int): Coin? {
-        if (this.context == null) {
-            Logger.instance.warning(tag, "not initialized!")
-            return null
-        }
-
-        Logger.instance.verbose(tag, "getCoinById $id")
-
-        val dbCoin = DbCoin(context!!)
-        val coin = dbCoin.findById(id).firstOrNull()
-        dbCoin.close()
-
-        return coin
-    }
-
-    override fun addCoin(coin: Coin) {
+    override fun loadCoinConversion(coinType: CoinType) {
         if (this.context == null) {
             Logger.instance.warning(tag, "not initialized!")
             return
         }
 
-        Logger.instance.verbose(tag, "addCoin $coin")
+        Logger.instance.verbose(tag, "loadCoinConversion")
+        apiService.load(DownloadType.Conversion, coinType, Constants.apiCoinConversion(arrayOf(coinType)))
+    }
 
-        val dbCoin = DbCoin(context!!)
-        dbCoin.add(coin)
-        dbCoin.close()
+    override fun loadCoinTrend(coinType: CoinType) {
+        if (this.context == null) {
+            Logger.instance.warning(tag, "not initialized!")
+            return
+        }
 
-        loadCoinConversion(coin.coinType)
-        loadCoinTrend(coin.coinType)
+        Logger.instance.verbose(tag, "loadCoinTrend for $coinType")
+
+        val currencyString = SharedPreferenceController(context!!).load(Constants.currency, Constants.currencyDefault)
+        val currencyId = Currency.values().first { x -> x.text == currencyString }.id
+        val currency = Currency.values()[currencyId]
+
+        apiService.load(DownloadType.Trend, coinType, Constants.apiCoinTrend(coinType, currency, 100))
     }
 
     override fun updateCoin(coin: Coin) {
@@ -154,86 +235,6 @@ internal class CoinService private constructor() : ICoinService {
         loadCoinTrend(coin.coinType)
     }
 
-    override fun deleteCoin(coin: Coin) {
-        if (this.context == null) {
-            Logger.instance.warning(tag, "not initialized!")
-            return
-        }
-
-        Logger.instance.verbose(tag, "deleteCoin $coin")
-
-        val dbCoin = DbCoin(context!!)
-        dbCoin.delete(coin)
-        dbCoin.close()
-
-        val dbCoinTrend = DbCoinTrend(context!!)
-        dbCoinTrend.clear(coin.coinType)
-        dbCoinTrend.close()
-
-        val dbCoinConversion = DbCoinConversion(context!!)
-        dbCoinConversion.clear(coin.coinType)
-        dbCoinConversion.close()
-    }
-
-    override fun loadCoinConversion(coinType: CoinType) {
-        if (this.context == null) {
-            Logger.instance.warning(tag, "not initialized!")
-            return
-        }
-
-        Logger.instance.verbose(tag, "loadCoinConversion")
-        apiService.load(DownloadType.Conversion, coinType, Constants.apiCoinConversion(arrayOf(coinType)))
-    }
-
-    override fun getCoinConversion(coinType: CoinType): CoinConversion? {
-        if (this.context == null) {
-            Logger.instance.warning(tag, "not initialized!")
-            return null
-        }
-
-        Logger.instance.verbose(tag, "getCoinConversion for $coinType")
-
-        val dbCoinConversion = DbCoinConversion(context!!)
-        val coinConversion = dbCoinConversion.findByCoinType(coinType).firstOrNull()
-        dbCoinConversion.close()
-
-        Logger.instance.verbose(tag, "coinConversion $coinConversion")
-
-        return coinConversion
-    }
-
-    override fun loadCoinTrend(coinType: CoinType) {
-        if (this.context == null) {
-            Logger.instance.warning(tag, "not initialized!")
-            return
-        }
-
-        Logger.instance.verbose(tag, "loadCoinTrend for $coinType")
-
-        val currencyString = SharedPreferenceController(context!!).load(Constants.currency, Constants.currencyDefault)
-        val currencyId = Currency.values().first { x -> x.text == currencyString }.id
-        val currency = Currency.values()[currencyId]
-
-        apiService.load(DownloadType.Trend, coinType, Constants.apiCoinTrend(coinType, currency, 100))
-    }
-
-    override fun getCoinTrend(coinType: CoinType): MutableList<CoinTrend> {
-        if (this.context == null) {
-            Logger.instance.warning(tag, "not initialized!")
-            return mutableListOf()
-        }
-
-        Logger.instance.verbose(tag, "getCoinTrend for $coinType")
-
-        val dbCoinTrend = DbCoinTrend(context!!)
-        val coinTrend = dbCoinTrend.findByCoinType(coinType)
-        dbCoinTrend.close()
-
-        Logger.instance.verbose(tag, "coinTrend $coinTrend")
-
-        return coinTrend
-    }
-
     private fun handleDownloadConversion(jsonString: String, success: Boolean, coinType: CoinType) {
         if (!success || jsonString.isEmpty()) {
             Logger.instance.error(tag, "handleDownloadConversion failed")
@@ -242,7 +243,7 @@ internal class CoinService private constructor() : ICoinService {
 
         Logger.instance.verbose(tag, "handleDownloadConversion with $jsonString has success $success")
 
-        val coinConversion = jsonDataToCoinConversionConverter.convertResponse(jsonString, coinType)
+        val coinConversion = JsonDataToCoinConversionConverter().convertResponse(jsonString, coinType)
         if (coinConversion != null) {
             val task = DbSaveTask()
             task.method = {
@@ -268,7 +269,7 @@ internal class CoinService private constructor() : ICoinService {
         val currencyId = Currency.values().first { x -> x.text == currencyString }.id
         val currency = Currency.values()[currencyId]
 
-        val updatedList = jsonDataToCoinTrendConverter.convertResponseToList(jsonString, coinType, currency)
+        val updatedList = JsonDataToCoinTrendConverter().convertResponseToList(jsonString, coinType, currency)
         if (updatedList.isNotEmpty()) {
             val task = DbSaveTask()
             task.method = {

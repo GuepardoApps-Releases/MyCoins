@@ -24,9 +24,11 @@ import kotlin.reflect.KCallable
 @ExperimentalUnsignedTypes
 internal class CoinListAdapter(private val context: Context, coinList: MutableList<Coin>, sortField: String, sortDirectionIsAsc: Boolean) : BaseAdapter() {
 
-    private val navigationController: NavigationController = NavigationController(context)
-    private val inflater: LayoutInflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
     private var coinAdapterList: List<CoinAdapterHolder> = listOf()
+
+    private val inflater: LayoutInflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+
+    private val navigationController: NavigationController = NavigationController(context)
 
     init {
         updateDataSet(coinList, sortField, sortDirectionIsAsc)
@@ -52,7 +54,7 @@ internal class CoinListAdapter(private val context: Context, coinList: MutableLi
 
     override fun getItem(position: Int): CoinAdapterHolder = coinAdapterList[position]
 
-    override fun getItemId(position: Int): Long = coinAdapterList[position].coin.id.toLong()
+    override fun getItemId(position: Int): Long = position.toLong()
 
     override fun getCount(): Int = coinAdapterList.size
 
@@ -60,52 +62,50 @@ internal class CoinListAdapter(private val context: Context, coinList: MutableLi
     override fun getView(index: Int, convertView: View?, parentView: ViewGroup?): View {
         val rowView: View = inflater.inflate(R.layout.list_item, null)
 
-        val holder = coinAdapterList[index]
-        holder.coinImage = rowView.findViewById(R.id.coin_item_image)
-        holder.type = rowView.findViewById(R.id.coin_item_type)
-        holder.amount = rowView.findViewById(R.id.coin_item_amount)
-        holder.currencyImage = rowView.findViewById(R.id.coin_item_currency_image)
-        holder.currencyValue = rowView.findViewById(R.id.coin_item_currency_value)
-        holder.totalValue = rowView.findViewById(R.id.coin_item_total_value)
-        holder.trend = rowView.findViewById(R.id.coin_item_trend_icon)
-        holder.additionalInformation = rowView.findViewById(R.id.coin_item_additionalInformation)
+        coinAdapterList[index].apply {
+            coinImage = rowView.findViewById(R.id.coin_item_image)
+            type = rowView.findViewById(R.id.coin_item_type)
+            amount = rowView.findViewById(R.id.coin_item_amount)
+            currencyImage = rowView.findViewById(R.id.coin_item_currency_image)
+            currencyValue = rowView.findViewById(R.id.coin_item_currency_value)
+            totalValue = rowView.findViewById(R.id.coin_item_total_value)
+            trend = rowView.findViewById(R.id.coin_item_trend_icon)
+            additionalInformation = rowView.findViewById(R.id.coin_item_additionalInformation)
 
-        holder.reload = rowView.findViewById(R.id.btnReload)
-        holder.edit = rowView.findViewById(R.id.btnEdit)
-        holder.delete = rowView.findViewById(R.id.btnDelete)
+            reload = rowView.findViewById(R.id.btnReload)
+            edit = rowView.findViewById(R.id.btnEdit)
+            delete = rowView.findViewById(R.id.btnDelete)
 
-        holder.coinImage.setImageResource(holder.coin.coinType.iconId)
+            coinImage.setImageResource(coin.coinType.iconId)
 
-        holder.type.text = holder.type()
-        holder.amount.text = holder.amountString()
-        holder.additionalInformation.text = holder.additionalInformation()
-        holder.totalValue.text = holder.totalValueString()
-        holder.currencyValue.text = holder.currencyValueString()
+            type.text = type()
+            amount.text = amountString()
+            additionalInformation.text = additionalInformation()
+            totalValue.text = totalValueString()
+            currencyValue.text = currencyValueString()
 
-        when (holder.currency) {
-            Currency.EUR -> holder.currencyImage.setImageResource(R.mipmap.euro)
-            Currency.USD -> holder.currencyImage.setImageResource(R.mipmap.dollar)
-        }
+            currencyImage.setImageResource(if (currency == Currency.EUR) R.mipmap.euro else if (currency == Currency.USD) R.mipmap.dollar else R.drawable.dummy)
 
-        holder.trend.setImageResource(CoinService.instance.getCoinTrend(holder.coin.coinType).getTrend().id)
+            trend.setImageResource(CoinService.instance.getCoinTrend(coin.coinType).getTrend().id)
 
-        holder.reload.setOnClickListener {
-            CoinService.instance.loadCoinConversion(holder.coin.coinType)
-            CoinService.instance.loadCoinTrend(holder.coin.coinType)
-        }
+            reload.setOnClickListener {
+                CoinService.instance.loadCoinConversion(coin.coinType)
+                CoinService.instance.loadCoinTrend(coin.coinType)
+            }
 
-        holder.edit.setOnClickListener {
-            val bundle = Bundle()
-            bundle.putInt(Constants.bundleDataId, holder.coin.id)
-            navigationController.navigateWithData(ActivityEdit::class.java, bundle, false)
-        }
+            edit.setOnClickListener {
+                val bundle = Bundle()
+                bundle.putString(Constants.bundleDataId, coin.id)
+                navigationController.navigateWithData(ActivityEdit::class.java, bundle, false)
+            }
 
-        holder.delete.setOnClickListener {
-            MaterialDialog(context).show {
-                title(text = context.getString(R.string.delete))
-                message(text = "${context.getString(R.string.delete)} ${holder.coin.coinType.type}?")
-                positiveButton(text = context.getString(R.string.yes)) { CoinService.instance.deleteCoin(holder.coin) }
-                negativeButton(text = context.getString(R.string.no))
+            delete.setOnClickListener {
+                MaterialDialog(context).show {
+                    title(text = context.getString(R.string.delete))
+                    message(text = "${context.getString(R.string.delete)} ${coin.coinType.type}?")
+                    positiveButton(text = context.getString(R.string.yes)) { CoinService.instance.deleteCoin(coin) }
+                    negativeButton(text = context.getString(R.string.no))
+                }
             }
         }
 

@@ -3,6 +3,7 @@ package guepardoapps.mycoins.utils
 import android.content.Context
 import androidx.annotation.NonNull
 import android.util.Log
+import com.github.guepardoapps.kulid.ULID
 import guepardoapps.mycoins.database.logging.DbLogging
 import guepardoapps.mycoins.database.logging.DbLog
 import guepardoapps.mycoins.database.logging.Severity
@@ -43,13 +44,6 @@ internal class Logger private constructor() {
         }
     }
 
-    fun <T> info(@NonNull tag: String, @NonNull description: T) {
-        if (loggingEnabled) {
-            Log.i(tag, description.toString())
-            tryToWriteToDatabase(tag, description, Severity.Info)
-        }
-    }
-
     fun <T> warning(@NonNull tag: String, @NonNull description: T) {
         if (loggingEnabled) {
             Log.w(tag, description.toString())
@@ -67,7 +61,7 @@ internal class Logger private constructor() {
     private fun <T> tryToWriteToDatabase(@NonNull tag: String, @NonNull description: T, severity: Severity) {
         if (dbHandler != null && writeToDatabaseEnabled) {
             dbHandler?.addLog(
-                    DbLog(-1,
+                    DbLog(ULID.random(),
                             Date(Calendar.getInstance().timeInMillis),
                             severity,
                             tag,

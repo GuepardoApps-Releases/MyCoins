@@ -7,26 +7,26 @@ import guepardoapps.mycoins.tasks.ApiRestCallTask
 import guepardoapps.mycoins.utils.Logger
 
 internal class ApiService : IApiService {
-    private val tag: String = ApiService::class.java.simpleName
 
     private lateinit var onApiServiceListener: OnApiServiceListener
 
-    override fun setOnApiServiceListener(onApiServiceListener: OnApiServiceListener) {
-        this.onApiServiceListener = onApiServiceListener
-    }
-
     override fun load(downloadType: DownloadType, coinType: CoinType, url: String): DownloadResult {
         if (url.isEmpty()) {
-            Logger.instance.warning(tag, "load: Url may not be empty")
+            Logger.instance.warning(ApiService::class.java.simpleName, "load: Url may not be empty")
             return DownloadResult.InvalidUrl
         }
 
-        val task = ApiRestCallTask()
+        val task = ApiRestCallTask().apply {
+            this.downloadType = downloadType
+            this.coinType = coinType
+        }
         task.onApiServiceListener = this.onApiServiceListener
-        task.downloadType = downloadType
-        task.coinType = coinType
         task.execute(url)
 
         return DownloadResult.Performing
+    }
+
+    override fun setOnApiServiceListener(onApiServiceListener: OnApiServiceListener) {
+        this.onApiServiceListener = onApiServiceListener
     }
 }

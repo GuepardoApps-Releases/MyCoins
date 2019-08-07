@@ -23,7 +23,7 @@ internal class DbCoin(context: Context) : SQLiteOpenHelper(context, DatabaseName
         val createTable = (
                 "CREATE TABLE IF NOT EXISTS $DatabaseTable"
                         + "("
-                        + "$ColumnId INTEGER PRIMARY KEY autoincrement,"
+                        + "$ColumnId TEXT PRIMARY KEY,"
                         + "$ColumnCoinType TEXT,"
                         + "$ColumnAmount DOUBLE,"
                         + "$ColumnAdditionalInformation TEXT"
@@ -32,17 +32,18 @@ internal class DbCoin(context: Context) : SQLiteOpenHelper(context, DatabaseName
         DbCoinActionPublishSubject.instance.publishSubject.onNext(DbPublishSubject(DbAction.Null, 1f))
     }
 
+    override fun onDowngrade(database: SQLiteDatabase, oldVersion: Int, newVersion: Int) = onUpgrade(database, oldVersion, newVersion)
+
     override fun onUpgrade(database: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
         database.execSQL("DROP TABLE IF EXISTS $DatabaseTable")
         onCreate(database)
     }
 
-    override fun onDowngrade(database: SQLiteDatabase, oldVersion: Int, newVersion: Int) = onUpgrade(database, oldVersion, newVersion)
-
     fun add(coin: Coin, currentActionNo: Float = 1f, totalActions: Float = 1f): Long {
         Logger.instance.debug(tag, "add: $coin")
 
         val values = ContentValues().apply {
+            put(ColumnId, coin.id)
             put(ColumnCoinType, coin.coinType.type)
             put(ColumnAmount, coin.amount)
             put(ColumnAdditionalInformation, coin.additionalInformation)
@@ -53,56 +54,15 @@ internal class DbCoin(context: Context) : SQLiteOpenHelper(context, DatabaseName
         return returnValue
     }
 
-    fun update(coin: Coin, currentActionNo: Float = 1f, totalActions: Float = 1f): Int {
-        Logger.instance.debug(tag, "update: $coin")
-
-        val values = ContentValues().apply {
-            put(ColumnCoinType, coin.coinType.type)
-            put(ColumnAmount, coin.amount)
-            put(ColumnAdditionalInformation, coin.additionalInformation)
-        }
-
-        val returnValue = this.writableDatabase.update(DatabaseTable, values, "$ColumnId LIKE ?", arrayOf(coin.id.toString()))
-        DbCoinActionPublishSubject.instance.publishSubject.onNext(DbPublishSubject(DbAction.Update, currentActionNo / totalActions))
-        return returnValue
-    }
-
     fun delete(coin: Coin, currentActionNo: Float = 1f, totalActions: Float = 1f): Int {
         Logger.instance.debug(tag, "delete: $coin")
 
-        val returnValue = this.writableDatabase.delete(DatabaseTable, "$ColumnId LIKE ?", arrayOf(coin.id.toString()))
+        val returnValue = this.writableDatabase.delete(DatabaseTable, "$ColumnId LIKE ?", arrayOf(coin.id))
         DbCoinActionPublishSubject.instance.publishSubject.onNext(DbPublishSubject(DbAction.Delete, currentActionNo / totalActions))
         return returnValue
     }
 
-    fun get(): MutableList<Coin> {
-        Logger.instance.debug(tag, "get")
-
-        val cursor = this.readableDatabase.query(DatabaseTable,
-                arrayOf(ColumnId, ColumnCoinType, ColumnAmount, ColumnAdditionalInformation),
-                null, null, null, null, "$ColumnId ASC")
-
-        val list = mutableListOf<Coin>()
-        with(cursor) {
-            while (moveToNext()) {
-                val id = getInt(getColumnIndexOrThrow(ColumnId))
-                val amount = getDouble(getColumnIndexOrThrow(ColumnAmount))
-
-                val coinTypeString = getString(getColumnIndexOrThrow(ColumnCoinType))
-                val coinType = CoinTypes.values.byString(coinTypeString)
-                if (coinType == CoinTypes.Null) coinType.type = coinTypeString
-
-                val additionalInformation = getString(getColumnIndexOrThrow(ColumnAdditionalInformation))
-
-                list.add(Coin(id = id, coinType = coinType, amount = amount, additionalInformation = additionalInformation))
-            }
-        }
-
-        DbCoinActionPublishSubject.instance.publishSubject.onNext(DbPublishSubject(DbAction.Get, 1f))
-        return list
-    }
-
-    fun findById(id: Int): MutableList<Coin> {
+    fun findById(id: String): MutableList<Coin> {
         Logger.instance.debug(tag, "findById: $id")
 
         val cursor = this.readableDatabase.query(DatabaseTable,
@@ -127,12 +87,53 @@ internal class DbCoin(context: Context) : SQLiteOpenHelper(context, DatabaseName
         return list
     }
 
+    fun get(): MutableList<Coin> {
+        Logger.instance.debug(tag, "get")
+
+        val cursor = this.readableDatabase.query(DatabaseTable,
+                arrayOf(ColumnId, ColumnCoinType, ColumnAmount, ColumnAdditionalInformation),
+                null, null, null, null, "$ColumnId ASC")
+
+        val list = mutableListOf<Coin>()
+        with(cursor) {
+            while (moveToNext()) {
+                val id = getString(getColumnIndexOrThrow(ColumnId))
+                val amount = getDouble(getColumnIndexOrThrow(ColumnAmount))
+
+                val coinTypeString = getString(getColumnIndexOrThrow(ColumnCoinType))
+                val coinType = CoinTypes.values.byString(coinTypeString)
+                if (coinType == CoinTypes.Null) coinType.type = coinTypeString
+
+                val additionalInformation = getString(getColumnIndexOrThrow(ColumnAdditionalInformation))
+
+                list.add(Coin(id = id, coinType = coinType, amount = amount, additionalInformation = additionalInformation))
+            }
+        }
+
+        DbCoinActionPublishSubject.instance.publishSubject.onNext(DbPublishSubject(DbAction.Get, 1f))
+        return list
+    }
+
+    fun update(coin: Coin, currentActionNo: Float = 1f, totalActions: Float = 1f): Int {
+        Logger.instance.debug(tag, "update: $coin")
+
+        val values = ContentValues().apply {
+            put(ColumnCoinType, coin.coinType.type)
+            put(ColumnAmount, coin.amount)
+            put(ColumnAdditionalInformation, coin.additionalInformation)
+        }
+
+        val returnValue = this.writableDatabase.update(DatabaseTable, values, "$ColumnId LIKE ?", arrayOf(coin.id))
+        DbCoinActionPublishSubject.instance.publishSubject.onNext(DbPublishSubject(DbAction.Update, currentActionNo / totalActions))
+        return returnValue
+    }
+
     companion object {
-        private const val DatabaseVersion = 2
-        private const val DatabaseName = "guepardoapps-mycoins-coin.db"
+        private const val DatabaseVersion = 1
+        private const val DatabaseName = "guepardoapps-mycoins-coin-2.db"
         private const val DatabaseTable = "coinTable"
 
-        private const val ColumnId = "_id"
+        private const val ColumnId = "id"
         private const val ColumnCoinType = "coinType"
         private const val ColumnAmount = "amount"
         private const val ColumnAdditionalInformation = "additionalInformation"

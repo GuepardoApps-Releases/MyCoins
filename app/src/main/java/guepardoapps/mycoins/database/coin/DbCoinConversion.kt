@@ -24,7 +24,7 @@ internal class DbCoinConversion(context: Context) : SQLiteOpenHelper(context, Da
         val createTable = (
                 "CREATE TABLE IF NOT EXISTS $DatabaseTable"
                         + "("
-                        + "$ColumnId INTEGER PRIMARY KEY autoincrement,"
+                        + "$ColumnId TEXT PRIMARY KEY,"
                         + "$ColumnCoinType TEXT,"
                         + "$ColumnEurValue DOUBLE,"
                         + "$ColumnUsDollarValue DOUBLE"
@@ -33,17 +33,18 @@ internal class DbCoinConversion(context: Context) : SQLiteOpenHelper(context, Da
         DbCoinConversionActionPublishSubject.instance.publishSubject.onNext(DbPublishSubject(DbAction.Null, 1f))
     }
 
+    override fun onDowngrade(database: SQLiteDatabase, oldVersion: Int, newVersion: Int) = onUpgrade(database, oldVersion, newVersion)
+
     override fun onUpgrade(database: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
         database.execSQL("DROP TABLE IF EXISTS $DatabaseTable")
         onCreate(database)
     }
 
-    override fun onDowngrade(database: SQLiteDatabase, oldVersion: Int, newVersion: Int) = onUpgrade(database, oldVersion, newVersion)
-
     fun add(coinConversion: CoinConversion, currentActionNo: Float = 1f, totalActions: Float = 1f): Long {
         Logger.instance.debug(tag, "add: $coinConversion")
 
         val values = ContentValues().apply {
+            put(ColumnId, coinConversion.id)
             put(ColumnCoinType, coinConversion.coinType.type)
             put(ColumnEurValue, coinConversion.eurValue)
             put(ColumnUsDollarValue, coinConversion.usDollarValue)
@@ -54,10 +55,19 @@ internal class DbCoinConversion(context: Context) : SQLiteOpenHelper(context, Da
         return returnValue
     }
 
+    fun clear(coinType: CoinType) {
+        Logger.instance.debug(tag, "clear")
+
+        val coinTrendList = findByCoinType(coinType)
+        for ((index, value) in coinTrendList.withIndex()) {
+            delete(value, index.toFloat(), coinTrendList.size.toFloat())
+        }
+    }
+
     fun delete(coinConversion: CoinConversion, currentActionNo: Float = 1f, totalActions: Float = 1f): Int {
         Logger.instance.debug(tag, "delete: $coinConversion")
 
-        val returnValue = this.writableDatabase.delete(DatabaseTable, "$ColumnId LIKE ?", arrayOf(coinConversion.id.toString()))
+        val returnValue = this.writableDatabase.delete(DatabaseTable, "$ColumnId LIKE ?", arrayOf(coinConversion.id))
         DbCoinConversionActionPublishSubject.instance.publishSubject.onNext(DbPublishSubject(DbAction.Delete, currentActionNo / totalActions))
         return returnValue
     }
@@ -72,7 +82,7 @@ internal class DbCoinConversion(context: Context) : SQLiteOpenHelper(context, Da
         val list = mutableListOf<CoinConversion>()
         with(cursor) {
             while (moveToNext()) {
-                val id = getInt(getColumnIndexOrThrow(ColumnId))
+                val id = getString(getColumnIndexOrThrow(ColumnId))
                 val eurValue = getDouble(getColumnIndexOrThrow(ColumnEurValue))
                 val usDollarValue = getDouble(getColumnIndexOrThrow(ColumnUsDollarValue))
 
@@ -80,12 +90,12 @@ internal class DbCoinConversion(context: Context) : SQLiteOpenHelper(context, Da
                 val coinType = CoinTypes.values.byString(coinTypeString)
                 if (coinType == CoinTypes.Null) coinType.type = coinTypeString
 
-                val coinConversion = CoinConversion()
-                coinConversion.id = id
-                coinConversion.coinType = coinType
-                coinConversion.eurValue = eurValue
-                coinConversion.usDollarValue = usDollarValue
-
+                val coinConversion = CoinConversion().apply {
+                    this.id = id
+                    this.coinType = coinType
+                    this.eurValue = eurValue
+                    this.usDollarValue = usDollarValue
+                }
                 list.add(coinConversion)
             }
         }
@@ -104,16 +114,16 @@ internal class DbCoinConversion(context: Context) : SQLiteOpenHelper(context, Da
         val list = mutableListOf<CoinConversion>()
         with(cursor) {
             while (moveToNext()) {
-                val id = getInt(getColumnIndexOrThrow(ColumnId))
+                val id = getString(getColumnIndexOrThrow(ColumnId))
                 val eurValue = getDouble(getColumnIndexOrThrow(ColumnEurValue))
                 val usDollarValue = getDouble(getColumnIndexOrThrow(ColumnUsDollarValue))
 
-                val coinConversion = CoinConversion()
-                coinConversion.id = id
-                coinConversion.coinType = coinType
-                coinConversion.eurValue = eurValue
-                coinConversion.usDollarValue = usDollarValue
-
+                val coinConversion = CoinConversion().apply {
+                    this.id = id
+                    this.coinType = coinType
+                    this.eurValue = eurValue
+                    this.usDollarValue = usDollarValue
+                }
                 list.add(coinConversion)
             }
         }
@@ -122,21 +132,12 @@ internal class DbCoinConversion(context: Context) : SQLiteOpenHelper(context, Da
         return list
     }
 
-    fun clear(coinType: CoinType) {
-        Logger.instance.debug(tag, "clear")
-
-        val coinTrendList = findByCoinType(coinType)
-        for ((index, value) in coinTrendList.withIndex()) {
-            delete(value, index.toFloat(), coinTrendList.size.toFloat())
-        }
-    }
-
     companion object {
-        private const val DatabaseVersion = 2
-        private const val DatabaseName = "guepardoapps-mycoins-coin-conversion.db"
+        private const val DatabaseVersion = 1
+        private const val DatabaseName = "guepardoapps-mycoins-coin-conversion-2.db"
         private const val DatabaseTable = "coinTable"
 
-        private const val ColumnId = "_id"
+        private const val ColumnId = "id"
         private const val ColumnCoinType = "coinType"
         private const val ColumnEurValue = "eurValue"
         private const val ColumnUsDollarValue = "usDollarValue"

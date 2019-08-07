@@ -11,33 +11,29 @@ import org.json.JSONObject
 internal class JsonDataToCoinTrendConverter : IJsonDataToCoinTrendConverter {
     private val tag: String = JsonDataToCoinTrendConverter::class.java.simpleName
 
-    private val responseJsonKey = "Response"
-    private val responseSuccessJsonKey = "Success"
-
     override fun convertResponseToList(jsonString: String, coinType: CoinType, currency: Currency): MutableList<CoinTrend> =
-
             try {
                 val list = mutableListOf<CoinTrend>()
                 Logger.instance.verbose(tag, jsonString)
 
                 val jsonObject = JSONObject(jsonString)
-                if (jsonObject.getString(responseJsonKey) == responseSuccessJsonKey) {
+                if (jsonObject.getString("Response") == "Success") {
                     val coinCurrencyC = CoinTrend()
                     val dataListJsonArray = jsonObject.getJSONArray(coinCurrencyC.getJsonKey().key)
 
                     for (index in 0 until dataListJsonArray.length() step 1) {
                         val dataJsonObject = dataListJsonArray.getJSONObject(index)
 
-                        val newCoinCurrency = CoinTrend()
-                        newCoinCurrency.id = index
-                        newCoinCurrency.time = dataJsonObject.getLong(newCoinCurrency.getPropertyJsonKey(newCoinCurrency::time.name).key)
-                        newCoinCurrency.openValue = dataJsonObject.getDouble(newCoinCurrency.getPropertyJsonKey(newCoinCurrency::openValue.name).key)
-                        newCoinCurrency.closeValue = dataJsonObject.getDouble(newCoinCurrency.getPropertyJsonKey(newCoinCurrency::closeValue.name).key)
-                        newCoinCurrency.lowValue = dataJsonObject.getDouble(newCoinCurrency.getPropertyJsonKey(newCoinCurrency::lowValue.name).key)
-                        newCoinCurrency.highValue = dataJsonObject.getDouble(newCoinCurrency.getPropertyJsonKey(newCoinCurrency::highValue.name).key)
-                        newCoinCurrency.coinType = coinType
-                        newCoinCurrency.currency = currency
-
+                        val newCoinCurrency = CoinTrend().apply {
+                            this.id = index
+                            this.time = dataJsonObject.getLong(getPropertyJsonKey(this::time.name).key)
+                            this.openValue = dataJsonObject.getDouble(getPropertyJsonKey(this::openValue.name).key)
+                            this.closeValue = dataJsonObject.getDouble(getPropertyJsonKey(this::closeValue.name).key)
+                            this.lowValue = dataJsonObject.getDouble(getPropertyJsonKey(this::lowValue.name).key)
+                            this.highValue = dataJsonObject.getDouble(getPropertyJsonKey(this::highValue.name).key)
+                            this.coinType = coinType
+                            this.currency = currency
+                        }
                         list.add(newCoinCurrency)
                     }
                 } else {
@@ -49,5 +45,4 @@ internal class JsonDataToCoinTrendConverter : IJsonDataToCoinTrendConverter {
                 Logger.instance.error(tag, exception)
                 mutableListOf()
             }
-
 }

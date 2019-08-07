@@ -31,8 +31,7 @@ class ActivityMain : Activity(), BottomNavigation.OnMenuItemSelectionListener {
     private val subscriptionsSize = 3
 
     private val sortFields: List<String> = CoinAdapterHolder::class.declaredMemberFunctions
-            .map { kFunction -> kFunction.annotations.firstOrNull { annotation -> annotation is SortField<*> } }
-            .filter { annotation -> annotation != null }
+            .mapNotNull { kFunction -> kFunction.annotations.firstOrNull { annotation -> annotation is SortField<*> } }
             .sortedBy { annotation -> (annotation as SortField<*>).position }
             .map { annotation -> (annotation as SortField<*>).field }
 
@@ -48,7 +47,7 @@ class ActivityMain : Activity(), BottomNavigation.OnMenuItemSelectionListener {
         val context = this
         coinListAdapter = CoinListAdapter(this, mutableListOf(), sortField, sortDirectionIsAsc)
 
-        val adapter = ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, sortFields)
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, sortFields)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         sortFieldSpinner.adapter = adapter
         sortFieldSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {

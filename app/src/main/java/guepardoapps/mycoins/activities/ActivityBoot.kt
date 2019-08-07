@@ -23,12 +23,13 @@ class ActivityBoot : Activity() {
         setContentView(R.layout.side_boot)
 
         val sharedPreferenceController = SharedPreferenceController(this)
-
         if (!(sharedPreferenceController.load(Constants.sharedPrefName, false))) {
-            sharedPreferenceController.save(Constants.currency, Constants.currencyDefault)
-            sharedPreferenceController.save(Constants.reloadEnabled, Constants.reloadEnabledDefault)
-            sharedPreferenceController.save(Constants.reloadTimeoutMs, Constants.reloadTimeoutMsDefault)
-            sharedPreferenceController.save(Constants.sharedPrefName, true)
+            sharedPreferenceController.apply {
+                save(Constants.currency, Constants.currencyDefault)
+                save(Constants.reloadEnabled, Constants.reloadEnabledDefault)
+                save(Constants.reloadTimeoutMs, Constants.reloadTimeoutMsDefault)
+                save(Constants.sharedPrefName, true)
+            }
         }
 
         if (!CoinService.instance.isInitialized) {

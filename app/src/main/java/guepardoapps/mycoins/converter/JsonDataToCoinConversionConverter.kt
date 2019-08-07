@@ -13,13 +13,12 @@ internal class JsonDataToCoinConversionConverter : IJsonDataToCoinConversionConv
             try {
                 Logger.instance.verbose(tag, jsonString)
 
-                val jsonObject = JSONObject(jsonString)
-                val coinJsonObject = jsonObject.getJSONObject(coinType.type)
-
-                val coinConversion = CoinConversion()
-                coinConversion.coinType = coinType
-                coinConversion.eurValue = coinJsonObject.getDouble(coinConversion.getPropertyJsonKey(coinConversion::eurValue.name).key)
-                coinConversion.usDollarValue = coinJsonObject.getDouble(coinConversion.getPropertyJsonKey(coinConversion::usDollarValue.name).key)
+                val coinJsonObject = JSONObject(jsonString).getJSONObject(coinType.type)
+                val coinConversion = CoinConversion().apply {
+                    this.coinType = coinType
+                    this.eurValue = coinJsonObject.getDouble(getPropertyJsonKey(this::eurValue.name).key)
+                    this.usDollarValue = coinJsonObject.getDouble(getPropertyJsonKey(this::usDollarValue.name).key)
+                }
 
                 coinConversion
             } catch (exception: Exception) {

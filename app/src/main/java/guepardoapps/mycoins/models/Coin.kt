@@ -1,3 +1,3 @@
 package guepardoapps.mycoins.models
 
-internal data class Coin(val id: Int, val coinType: CoinType, var amount: Double, var additionalInformation: String)
+internal data class Coin(val id: String, val coinType: CoinType, var amount: Double, var additionalInformation: String)
