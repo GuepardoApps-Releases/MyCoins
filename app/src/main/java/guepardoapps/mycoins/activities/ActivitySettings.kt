@@ -9,6 +9,7 @@ import android.text.TextWatcher
 import android.view.View
 import android.widget.ArrayAdapter
 import com.rey.material.widget.FloatingActionButton
+import es.dmoral.toasty.Toasty
 import guepardoapps.mycoins.R
 import guepardoapps.mycoins.common.Constants
 import guepardoapps.mycoins.controller.SharedPreferenceController
@@ -46,6 +47,7 @@ class ActivitySettings : Activity() {
                     focusView?.requestFocus()
                 } else {
                     sharedPreferenceController.save(Constants.currency, currencyTypeString)
+                    Toasty.success(context, getString(R.string.successfully_saved)).show()
                     finish()
                 }
             }

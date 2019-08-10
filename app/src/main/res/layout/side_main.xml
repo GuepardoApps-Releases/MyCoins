@@ -19,13 +19,21 @@
             android:layout_alignParentStart="true"
             android:layout_toStartOf="@id/sortDirectionButton" />
 
-        <ToggleButton
+        <com.rey.material.widget.FloatingActionButton
             android:id="@+id/sortDirectionButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
-            android:textOff="DESC"
-            android:textOn="ASC" />
+            android:layout_gravity="center"
+            android:contentDescription="@string/contentDescription"
+            app:fab_iconSize="12dp"
+            app:fab_iconSrc="@android:drawable/arrow_up_float"
+            app:fab_radius="17dp"
+            app:rd_backgroundColor="@color/DarkPrimary"
+            app:rd_delayClick="none"
+            app:rd_enable="true"
+            app:rd_rippleColor="@color/colorAccent"
+            app:rd_rippleType="touch" />
 
         <ListView
             android:id="@+id/listView"

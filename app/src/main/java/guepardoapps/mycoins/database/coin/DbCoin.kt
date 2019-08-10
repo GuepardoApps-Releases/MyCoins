@@ -67,7 +67,7 @@ internal class DbCoin(context: Context) : SQLiteOpenHelper(context, DatabaseName
 
         val cursor = this.readableDatabase.query(DatabaseTable,
                 arrayOf(ColumnId, ColumnCoinType, ColumnAmount, ColumnAdditionalInformation),
-                "$ColumnId = $id", null, null, null, "$ColumnId ASC")
+                "$ColumnId = '$id'", null, null, null, "$ColumnId ASC")
 
         val list = mutableListOf<Coin>()
         with(cursor) {

@@ -5,7 +5,6 @@ import guepardoapps.mycoins.annotations.JsonKey
 
 @JsonKey("", "")
 internal class CoinConversion {
-    private val tag: String = CoinConversion::class.java.simpleName
 
     var id: String = ULID.random()
 
@@ -17,5 +16,5 @@ internal class CoinConversion {
     @JsonKey("", "USD")
     var usDollarValue: Double = 0.0
 
-    override fun toString(): String = "{Class: $tag, Id: $id, CoinType: $coinType, EurValue: $eurValue, UsDollarValue: $usDollarValue}"
+    override fun toString(): String = "{Class: ${CoinConversion::class.java.simpleName}, Id: $id, CoinType: $coinType, EurValue: $eurValue, UsDollarValue: $usDollarValue}"
 }

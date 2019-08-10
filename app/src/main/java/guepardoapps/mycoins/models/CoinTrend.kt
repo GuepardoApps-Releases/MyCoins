@@ -5,7 +5,6 @@ import guepardoapps.mycoins.enums.Currency
 
 @JsonKey("", "Data")
 internal class CoinTrend {
-    private val tag: String = CoinTrend::class.java.simpleName
 
     @JsonKey("Data", "")
     var id: Int = 0
@@ -26,7 +25,8 @@ internal class CoinTrend {
     var highValue: Double = 0.0
 
     var coinType: CoinType = CoinTypes.Null
+
     var currency: Currency = Currency.EUR
 
-    override fun toString(): String = "{Class: $tag, Id: $id, Time: $time, OpenValue: $openValue, CloseValue: $closeValue, LowValue: $lowValue, HighValue: $highValue, CoinType: $coinType, Currency: $currency}"
+    override fun toString(): String = "{Class: ${CoinTrend::class.java.simpleName}, Id: $id, Time: $time, OpenValue: $openValue, CloseValue: $closeValue, LowValue: $lowValue, HighValue: $highValue, CoinType: $coinType, Currency: $currency}"
 }

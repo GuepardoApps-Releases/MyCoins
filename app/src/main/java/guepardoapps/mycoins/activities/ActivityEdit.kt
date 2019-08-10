@@ -10,6 +10,7 @@ import android.view.View
 import android.widget.ArrayAdapter
 import com.github.guepardoapps.kulid.ULID
 import com.rey.material.widget.FloatingActionButton
+import es.dmoral.toasty.Toasty
 import guepardoapps.mycoins.R
 import guepardoapps.mycoins.common.Constants
 import guepardoapps.mycoins.extensions.byString
@@ -25,8 +26,10 @@ class ActivityEdit : Activity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.side_edit)
 
+        val context = this
         var coin: Coin? = null
         val data = intent.extras
+
         if (data != null) {
             val id = data.getString(Constants.bundleDataId)
             coin = CoinService.instance.getCoinById(id!!)
@@ -68,8 +71,10 @@ class ActivityEdit : Activity() {
 
                     if (coin != null) {
                         CoinService.instance.updateCoin(Coin(coin.id, coinType, amount, additionalInformation))
+                        Toasty.success(context, getString(R.string.successfully_updated)).show()
                     } else {
                         CoinService.instance.addCoin(Coin(ULID.random(), coinType, amount, additionalInformation))
+                        Toasty.success(context, getString(R.string.successfully_added)).show()
                     }
 
                     finish()
@@ -86,7 +91,7 @@ class ActivityEdit : Activity() {
             override fun onTextChanged(charSequence: CharSequence?, start: Int, count: Int, after: Int) {}
         }
 
-        coin_type_edit_textview.setAdapter(ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, CoinTypes.values.map { x -> x.type }))
+        coin_type_edit_textview.setAdapter(ArrayAdapter(context, android.R.layout.simple_dropdown_item_1line, CoinTypes.values.map { x -> x.type }))
         coin_type_edit_textview.addTextChangedListener(textWatcher)
         coin_amount_edit_textview.addTextChangedListener(textWatcher)
         coin_additionalInformation_edit_textview.addTextChangedListener(textWatcher)

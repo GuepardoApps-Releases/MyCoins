@@ -8,7 +8,7 @@ import guepardoapps.mycoins.utils.Logger
 
 internal class ApiService : IApiService {
 
-    private lateinit var onApiServiceListener: OnApiServiceListener
+    lateinit var apiServiceListener: OnApiServiceListener
 
     override fun load(downloadType: DownloadType, coinType: CoinType, url: String): DownloadResult {
         if (url.isEmpty()) {
@@ -16,17 +16,13 @@ internal class ApiService : IApiService {
             return DownloadResult.InvalidUrl
         }
 
-        val task = ApiRestCallTask().apply {
+        ApiRestCallTask().apply {
             this.downloadType = downloadType
             this.coinType = coinType
+            onApiServiceListener = apiServiceListener
+            execute(url)
         }
-        task.onApiServiceListener = this.onApiServiceListener
-        task.execute(url)
 
         return DownloadResult.Performing
-    }
-
-    override fun setOnApiServiceListener(onApiServiceListener: OnApiServiceListener) {
-        this.onApiServiceListener = onApiServiceListener
     }
 }

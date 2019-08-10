@@ -1,0 +1,40 @@
+<resources>
+    <string name="create">Erstellen</string>
+    <string name="edit">Editieren</string>
+    <string name="delete">Löschen</string>
+    <string name="send">Senden</string>
+    <string name="save">Speichern</string>
+    <string name="add">Hinzufügen</string>
+    <string name="back">Zurück</string>
+    <string name="settings">Einstellungen</string>
+    <string name="sum">Summe</string>
+
+    <string name="prompt">Aufforderung</string>
+    <string name="ok">Ok</string>
+    <string name="neutral">Neutral</string>
+    <string name="cancel">Abbrechen</string>
+    <string name="yes">Ja</string>
+    <string name="no">Nein</string>
+
+    <string name="example">Beispiel</string>
+    <string name="short_example">Beispiel</string>
+    <string name="contentDescription">Dies ist ein Bild</string>
+
+    <string name="prompt_coin_type">Coin Typ</string>
+    <string name="prompt_coin_amount">Coin Menge</string>
+    <string name="prompt_coin_additionalInformation">Zusätzliche Informationen</string>
+    <string name="prompt_currency_preferred">Bevorzugte Währung (EUR/USD)</string>
+
+    <string name="error_field_invalid_date">Dieses Datum ist nicht valide</string>
+    <string name="error_nothing_changed">Es hat sich nichts geändert</string>
+    <string name="error_field_required">Dieses Feld ist erforderlich</string>
+
+    <string name="successfully_saved">Erfolgreich gespeichert</string>
+    <string name="successfully_added">Erfolgreich hinzugefügt</string>
+    <string name="successfully_updated">Erfolgreich aktualisiert</string>
+
+    <string name="about">Über</string>
+    <string name="author_title">Autor</string>
+    <string name="version_title">Version</string>
+    <string name="email_title">E-Mail</string>
+</resources>

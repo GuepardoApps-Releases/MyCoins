@@ -48,8 +48,8 @@ internal class CoinAdapterHolder(var coin: Coin, var currency: Currency, private
     }
 
     fun currencyValueString(): String = if (coinConversion == null) "-" else when (currency) {
-        Currency.EUR -> "${coinConversion!!.eurValue.doubleFormat(6)} €"
-        Currency.USD -> "${coinConversion!!.usDollarValue.doubleFormat(6)} $"
+        Currency.EUR -> "${coinConversion!!.eurValue.doubleFormat(2)} €"
+        Currency.USD -> "${coinConversion!!.usDollarValue.doubleFormat(2)} $"
     }
 
     @SortField<Double>("Total Value", 4u, Double::class)

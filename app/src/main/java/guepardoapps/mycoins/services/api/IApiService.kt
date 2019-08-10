@@ -6,6 +6,4 @@ import guepardoapps.mycoins.enums.DownloadType
 
 internal interface IApiService {
     fun load(downloadType: DownloadType, coinType: CoinType, url: String): DownloadResult
-
-    fun setOnApiServiceListener(onApiServiceListener: OnApiServiceListener)
 }

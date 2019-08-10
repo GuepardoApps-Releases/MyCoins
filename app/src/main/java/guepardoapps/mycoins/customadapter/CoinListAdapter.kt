@@ -24,7 +24,7 @@ import kotlin.reflect.KCallable
 @ExperimentalUnsignedTypes
 internal class CoinListAdapter(private val context: Context, coinList: MutableList<Coin>, sortField: String, sortDirectionIsAsc: Boolean) : BaseAdapter() {
 
-    private var coinAdapterList: List<CoinAdapterHolder> = listOf()
+    private var coinAdapterList: MutableList<CoinAdapterHolder> = mutableListOf()
 
     private val inflater: LayoutInflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
 
@@ -35,21 +35,18 @@ internal class CoinListAdapter(private val context: Context, coinList: MutableLi
     }
 
     fun updateDataSet(coinList: MutableList<Coin>, sortField: String, sortDirectionIsAsc: Boolean) {
-        coinAdapterList = coinList.map { coin ->
-            val currencyString = SharedPreferenceController(context).load(Constants.currency, Constants.currencyDefault)
-            val currencyId = Currency.values().first { x -> x.text == currencyString }.id
-            val currency = Currency.values()[currencyId]
-            val coinConversion = CoinService.instance.getCoinConversion(coin.coinType)
-            return@map CoinAdapterHolder(coin, currency, coinConversion)
-        }
+        if (coinList.any()) {
+            coinAdapterList.clear()
+            coinAdapterList.addAll(coinList.map { coin ->
+                val currencyString = SharedPreferenceController(context).load(Constants.currency, Constants.currencyDefault)
+                val currencyId = Currency.values().first { x -> x.text == currencyString }.id
+                val currency = Currency.values()[currencyId]
+                val coinConversion = CoinService.instance.getCoinConversion(coin.coinType)
+                return@map CoinAdapterHolder(coin, currency, coinConversion)
+            }.sortedWith(if (sortDirectionIsAsc) compareBy { coinAdapterHolder -> useCompareField(coinAdapterHolder, sortField) } else compareByDescending { coinAdapterHolder -> useCompareField(coinAdapterHolder, sortField) }))
 
-        coinAdapterList = if (sortDirectionIsAsc) {
-            coinAdapterList.sortedWith(compareBy { coinAdapterHolder -> useCompareField(coinAdapterHolder, sortField) })
-        } else {
-            coinAdapterList.sortedWith(compareByDescending { coinAdapterHolder -> useCompareField(coinAdapterHolder, sortField) })
+            notifyDataSetChanged()
         }
-
-        notifyDataSetChanged()
     }
 
     override fun getItem(position: Int): CoinAdapterHolder = coinAdapterList[position]
@@ -62,49 +59,51 @@ internal class CoinListAdapter(private val context: Context, coinList: MutableLi
     override fun getView(index: Int, convertView: View?, parentView: ViewGroup?): View {
         val rowView: View = inflater.inflate(R.layout.list_item, null)
 
-        coinAdapterList[index].apply {
-            coinImage = rowView.findViewById(R.id.coin_item_image)
-            type = rowView.findViewById(R.id.coin_item_type)
-            amount = rowView.findViewById(R.id.coin_item_amount)
-            currencyImage = rowView.findViewById(R.id.coin_item_currency_image)
-            currencyValue = rowView.findViewById(R.id.coin_item_currency_value)
-            totalValue = rowView.findViewById(R.id.coin_item_total_value)
-            trend = rowView.findViewById(R.id.coin_item_trend_icon)
-            additionalInformation = rowView.findViewById(R.id.coin_item_additionalInformation)
+        if (coinAdapterList.size > index) {
+            coinAdapterList[index].apply {
+                coinImage = rowView.findViewById(R.id.coin_item_image)
+                type = rowView.findViewById(R.id.coin_item_type)
+                amount = rowView.findViewById(R.id.coin_item_amount)
+                currencyImage = rowView.findViewById(R.id.coin_item_currency_image)
+                currencyValue = rowView.findViewById(R.id.coin_item_currency_value)
+                totalValue = rowView.findViewById(R.id.coin_item_total_value)
+                trend = rowView.findViewById(R.id.coin_item_trend_icon)
+                additionalInformation = rowView.findViewById(R.id.coin_item_additionalInformation)
 
-            reload = rowView.findViewById(R.id.btnReload)
-            edit = rowView.findViewById(R.id.btnEdit)
-            delete = rowView.findViewById(R.id.btnDelete)
+                reload = rowView.findViewById(R.id.btnReload)
+                edit = rowView.findViewById(R.id.btnEdit)
+                delete = rowView.findViewById(R.id.btnDelete)
 
-            coinImage.setImageResource(coin.coinType.iconId)
+                coinImage.setImageResource(coin.coinType.iconId)
 
-            type.text = type()
-            amount.text = amountString()
-            additionalInformation.text = additionalInformation()
-            totalValue.text = totalValueString()
-            currencyValue.text = currencyValueString()
+                type.text = type()
+                amount.text = amountString()
+                additionalInformation.text = additionalInformation()
+                totalValue.text = totalValueString()
+                currencyValue.text = currencyValueString()
 
-            currencyImage.setImageResource(if (currency == Currency.EUR) R.mipmap.euro else if (currency == Currency.USD) R.mipmap.dollar else R.drawable.dummy)
+                currencyImage.setImageResource(if (currency == Currency.EUR) R.mipmap.euro else if (currency == Currency.USD) R.mipmap.dollar else R.drawable.dummy)
 
-            trend.setImageResource(CoinService.instance.getCoinTrend(coin.coinType).getTrend().id)
+                trend.setImageResource(CoinService.instance.getCoinTrend(coin.coinType).getTrend().id)
 
-            reload.setOnClickListener {
-                CoinService.instance.loadCoinConversion(coin.coinType)
-                CoinService.instance.loadCoinTrend(coin.coinType)
-            }
+                reload.setOnClickListener {
+                    CoinService.instance.loadCoinConversion(coin.coinType)
+                    CoinService.instance.loadCoinTrend(coin.coinType)
+                }
 
-            edit.setOnClickListener {
-                val bundle = Bundle()
-                bundle.putString(Constants.bundleDataId, coin.id)
-                navigationController.navigateWithData(ActivityEdit::class.java, bundle, false)
-            }
+                edit.setOnClickListener {
+                    val bundle = Bundle()
+                    bundle.putString(Constants.bundleDataId, coin.id)
+                    navigationController.navigateWithData(ActivityEdit::class.java, bundle, false)
+                }
 
-            delete.setOnClickListener {
-                MaterialDialog(context).show {
-                    title(text = context.getString(R.string.delete))
-                    message(text = "${context.getString(R.string.delete)} ${coin.coinType.type}?")
-                    positiveButton(text = context.getString(R.string.yes)) { CoinService.instance.deleteCoin(coin) }
-                    negativeButton(text = context.getString(R.string.no))
+                delete.setOnClickListener {
+                    MaterialDialog(context).show {
+                        title(text = context.getString(R.string.delete))
+                        message(text = "${context.getString(R.string.delete)} ${coin.coinType.type}?")
+                        positiveButton(text = context.getString(R.string.yes)) { CoinService.instance.deleteCoin(coin) }
+                        negativeButton(text = context.getString(R.string.no))
+                    }
                 }
             }
         }

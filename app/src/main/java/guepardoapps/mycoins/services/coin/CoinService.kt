@@ -52,11 +52,10 @@ internal class CoinService private constructor() : ICoinService {
         }
 
         Logger.instance.verbose(tag, "addCoin $coin")
-
-        val dbCoin = DbCoin(context!!)
-        dbCoin.add(coin)
-        dbCoin.close()
-
+        DbCoin(context!!).apply {
+            add(coin)
+            close()
+        }
         loadCoinConversion(coin.coinType)
         loadCoinTrend(coin.coinType)
     }
@@ -68,18 +67,18 @@ internal class CoinService private constructor() : ICoinService {
         }
 
         Logger.instance.verbose(tag, "deleteCoin $coin")
-
-        val dbCoin = DbCoin(context!!)
-        dbCoin.delete(coin)
-        dbCoin.close()
-
-        val dbCoinTrend = DbCoinTrend(context!!)
-        dbCoinTrend.clear(coin.coinType)
-        dbCoinTrend.close()
-
-        val dbCoinConversion = DbCoinConversion(context!!)
-        dbCoinConversion.clear(coin.coinType)
-        dbCoinConversion.close()
+        DbCoin(context!!).apply {
+            delete(coin)
+            close()
+        }
+        DbCoinTrend(context!!).apply {
+            clear(coin.coinType)
+            close()
+        }
+        DbCoinConversion(context!!).apply {
+            clear(coin.coinType)
+            close()
+        }
     }
 
     override fun getCoinById(id: String): Coin? {
@@ -148,13 +147,12 @@ internal class CoinService private constructor() : ICoinService {
 
     override fun initialize(context: Context) {
         Logger.instance.verbose(tag, "initialize")
-
         if (this.context != null) {
             return
         }
-        this.context = context
 
-        apiService.setOnApiServiceListener(object : OnApiServiceListener {
+        this.context = context
+        apiService.apiServiceListener = (object : OnApiServiceListener {
             override fun onFinished(downloadType: DownloadType, coinType: CoinType, jsonString: String, success: Boolean) {
                 Logger.instance.verbose(tag, "Received onDownloadListener onFinished: $downloadType, $coinType, $jsonString, $success")
 
@@ -247,10 +245,11 @@ internal class CoinService private constructor() : ICoinService {
         if (coinConversion != null) {
             val task = DbSaveTask()
             task.method = {
-                val dbCoinConversion = DbCoinConversion(context!!)
-                dbCoinConversion.clear(coinType)
-                dbCoinConversion.add(coinConversion)
-                dbCoinConversion.close()
+                DbCoinConversion(context!!).apply {
+                    clear(coinType)
+                    add(coinConversion)
+                    close()
+                }
             }
             task.execute()
             return
@@ -273,12 +272,13 @@ internal class CoinService private constructor() : ICoinService {
         if (updatedList.isNotEmpty()) {
             val task = DbSaveTask()
             task.method = {
-                val dbCoinTrend = DbCoinTrend(context!!)
-                dbCoinTrend.clear(coinType)
-                for ((index, updatedValue) in updatedList.withIndex()) {
-                    dbCoinTrend.add(updatedValue, index.toFloat(), updatedList.size.toFloat())
+                DbCoinTrend(context!!).apply {
+                    clear(coinType)
+                    for ((index, updatedValue) in updatedList.withIndex()) {
+                        add(updatedValue, index.toFloat(), updatedList.size.toFloat())
+                    }
+                    close()
                 }
-                dbCoinTrend.close()
             }
             task.execute()
             return

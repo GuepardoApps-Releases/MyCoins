@@ -22,15 +22,15 @@ class ActivityBoot : Activity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.side_boot)
 
-        val sharedPreferenceController = SharedPreferenceController(this)
-        if (!(sharedPreferenceController.load(Constants.sharedPrefName, false))) {
-            sharedPreferenceController.apply {
-                save(Constants.currency, Constants.currencyDefault)
-                save(Constants.reloadEnabled, Constants.reloadEnabledDefault)
-                save(Constants.reloadTimeoutMs, Constants.reloadTimeoutMsDefault)
-                save(Constants.sharedPrefName, true)
-            }
-        }
+        SharedPreferenceController(this)
+                .apply {
+                    if (load(Constants.sharedPrefName, false)) {
+                        save(Constants.currency, Constants.currencyDefault)
+                        save(Constants.reloadEnabled, Constants.reloadEnabledDefault)
+                        save(Constants.reloadTimeoutMs, Constants.reloadTimeoutMsDefault)
+                        save(Constants.sharedPrefName, true)
+                    }
+                }
 
         if (!CoinService.instance.isInitialized) {
             subscription = CoinService.instance.initialSetupPublishSubject
