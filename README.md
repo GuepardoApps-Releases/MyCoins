@@ -15,7 +15,9 @@ Simple android application with material design to save the amount of coins you 
 
 ## Screenshots
 
-![alt tag](screenshots/header_001.png)
+![alt tag](./screenshots/header_001.png)
+
+![alt tag](./screenshots/header_002.png)
 
 ## Upgrade warning
 
